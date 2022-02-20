@@ -5,7 +5,6 @@ use std::ops::{AddAssign, Mul};
 /// A trait for matrix multiplication.
 pub trait Matmul<T> {
     type Output;
-    /// This is somewhat inefficient, it will often not be as efficient as [`std::vec::Vec::push`].
     /// ```text
     /// ┌───────┐        ┌─────┐  ┌─────┐
     /// │ 1 1 1 │        │ 1 2 │  │ 4 5 │

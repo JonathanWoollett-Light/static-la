@@ -36,6 +36,11 @@
 //! In this example the only operations which cannot be fully checked at compile time are:
 //! 1. `a.clone() + b.clone()`
 //! 2. `d.add_columns(e)`
+//!
+//! ### Supported operations
+//! - Primitive arithmetics operations `+` `-` `/` `*` (and respective assign variants e.g. [`std::ops::AddAssign`]).
+//! - [`AddColumns::add_columns`] & [`AddRows::add_rows`].
+//! - [`Matmul::matmul`].
 
 /// [`std::ops::Add`] Arithmetic addition operations.
 mod add;
