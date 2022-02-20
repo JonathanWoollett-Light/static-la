@@ -40,6 +40,6 @@ In this example the only operations which cannot be fully checked at compile tim
 2. `d.add_columns(e)`
 
 ### Supported operations
- - Primitive arithmetics operations `+` `-` `/` `*` (and respective assign variants e.g. [`std::ops::AddAssign`]).
- - [`AddColumns::add_columns`] & [`AddRows::add_rows`].
- - [`Matmul::matmul`].
+ - Primitive arithmetics operations `+` `-` `/` `*` (and respective assign variants e.g. `std::ops::AddAssign`).
+ - `AddColumns::add_columns` & `AddRows::add_rows`.
+ - `Matmul::matmul`.
