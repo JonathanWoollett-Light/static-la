@@ -9,7 +9,6 @@ license = "Apache-2.0"
 repository = "https://github.com/JonathanWoollett-Light/static-la"
 documentation = "https://docs.rs/static-la/"
 readme = "README.md"
-exclude = ["/benches/benchmarks.rs"]
 
 categories = ["mathematics"]
 
