@@ -18,6 +18,8 @@ When performing the addition of a `MatrixDxS` (a matrix with a known number of c
 
 That being said... I made this in a weekend, there is a tiny amount of functionality and its ~4x slower than [`ndarray`](https://docs.rs/ndarray/latest/ndarray/) and [`nalgebra`](https://docs.rs/nalgebra/latest/nalgebra/).
 
+
+
 An example of how types will propagate through a program:
 ```rust
 use static_la::*;
@@ -43,3 +45,10 @@ In this example the only operations which cannot be fully checked at compile tim
  - Primitive arithmetics operations `+` `-` `/` `*` (and respective assign variants e.g. `std::ops::AddAssign`).
  - `AddColumns::add_columns` & `AddRows::add_rows`.
  - `Matmul::matmul`.
+
+### Comparisons
+
+<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/add.svg" width="700">
+<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/sub.svg" width="700">
+<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/mul.svg" width="700">
+<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/div.svg" width="700">
