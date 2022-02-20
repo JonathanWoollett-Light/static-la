@@ -1,5 +1,9 @@
 # Static L.A. (Linear Algebra)
 
+[![Crates.io](https://img.shields.io/crates/v/static-la)](https://crates.io/crates/static-la)
+[![lib.rs.io](https://img.shields.io/crates/v/static-la?color=blue&label=lib.rs)](https://lib.rs/crates/static-la)
+[![docs](https://img.shields.io/crates/v/static-la?color=yellow&label=docs)](https://docs.rs/static-la)
+
 An extremely minimal super static type safe implementation of matrix types.
 
 While [`ndarray`](https://docs.rs/ndarray/latest/ndarray/) offers no compile time type checking
