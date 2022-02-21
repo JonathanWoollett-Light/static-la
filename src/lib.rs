@@ -345,7 +345,7 @@ where
     [(); ROWS * COLUMNS]:,
 {
     /// Underlying data.
-    pub data: [T; ROWS * COLUMNS],
+    data: [T; ROWS * COLUMNS],
 }
 impl<T, const ROWS: usize, const COLUMNS: usize> MatrixSxS<T, ROWS, COLUMNS>
 where
