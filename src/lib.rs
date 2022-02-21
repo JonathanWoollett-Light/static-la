@@ -199,6 +199,8 @@ pub use transpose::*;
 mod neg;
 /// [`std::ops::Rem`] Remainder functionality.
 mod rem;
+/// [`std::ops::RemAssign`] Remainder assign functionality.
+mod rem_assign;
 /// [`std::convert::TryFrom`] Fallible value-to-value conversions.
 mod try_from;
 
