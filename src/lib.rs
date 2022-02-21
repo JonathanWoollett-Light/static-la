@@ -199,6 +199,10 @@ pub use transpose::*;
 mod bitand;
 /// [`std::ops::BitAndAssign`] Bitwise AND assignment operation.
 mod bitand_assign;
+/// [`std::ops::BitOr`] Bitwise OR operation.
+mod bitor;
+/// [`std::ops::BitOrAssign`] Bitwise OR assignment operation.
+mod bitor_assign;
 /// [`std::ops::Neg`] Negation operations.
 mod neg;
 /// [`std::ops::Rem`] Remainder functionality.
