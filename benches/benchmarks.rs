@@ -775,7 +775,7 @@ fn nalgebra_rand(rows: usize, columns: usize) -> nalgebra::DMatrix<f32> {
 fn dynamic_add_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Add");
     group.warm_up_time(std::time::Duration::from_millis(50));
-    group.measurement_time(std::time::Duration::from_millis(200));
+    group.measurement_time(std::time::Duration::from_millis(400));
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
@@ -797,7 +797,7 @@ fn dynamic_add_comparison(c: &mut Criterion) {
 fn dynamic_sub_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Sub");
     group.warm_up_time(std::time::Duration::from_millis(50));
-    group.measurement_time(std::time::Duration::from_millis(200));
+    group.measurement_time(std::time::Duration::from_millis(400));
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
@@ -819,7 +819,7 @@ fn dynamic_sub_comparison(c: &mut Criterion) {
 fn dynamic_div_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Div");
     group.warm_up_time(std::time::Duration::from_millis(50));
-    group.measurement_time(std::time::Duration::from_millis(200));
+    group.measurement_time(std::time::Duration::from_millis(400));
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
@@ -841,7 +841,7 @@ fn dynamic_div_comparison(c: &mut Criterion) {
 fn dynamic_mul_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Mul");
     group.warm_up_time(std::time::Duration::from_millis(50));
-    group.measurement_time(std::time::Duration::from_millis(200));
+    group.measurement_time(std::time::Duration::from_millis(400));
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
