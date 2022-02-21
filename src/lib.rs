@@ -196,7 +196,7 @@ mod sums;
 mod transpose;
 pub use transpose::*;
 /// [`std::ops::BitAnd`] Bitwise AND operation.
-mod bit_and;
+mod bitand;
 /// [`std::ops::Neg`] Negation operations.
 mod neg;
 /// [`std::ops::Rem`] Remainder functionality.
