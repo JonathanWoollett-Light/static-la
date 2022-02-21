@@ -16,6 +16,8 @@
 //!
 //! That being said... I made this in a weekend and there is a tiny amount of functionality.
 //!
+//! *Note: Some examples may be ignored but all are tested, in rustdoc or in a plain test.*
+//!
 //! An example of how types will propagate through a program:
 //! ```ignore
 //! use static_la::*;
@@ -32,16 +34,68 @@
 //! // MatrixSxS<i32,4,6>
 //! let f = d.add_columns(e);
 //! ```
-//! *This example is not tested **here**, it is tested in a test in the project.*
 //!
 //! In this example the only operations which cannot be fully checked at compile time are:
 //! 1. `a.clone() + b.clone()`
 //! 2. `d.add_columns(e)`
 //!
-//! ### Supported operations
-//! - Primitive arithmetics operations `+` `-` `/` `*` (and respective assign variants e.g. [`std::ops::AddAssign`]).
-//! - [`AddColumns::add_columns`] & [`AddRows::add_rows`].
-//! - [`Matmul::matmul`].
+//!
+//! ### Construction
+//! ```rust
+//! use std::convert::TryFrom;
+//! use static_la::*;
+//! let dxd = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
+//! let dxs = MatrixDxS::from(vec![[1, 2, 3], [4, 5, 6]]);
+//! let sxd = MatrixSxD::try_from([vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
+//! let sxs = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
+//! // ┌───────┐
+//! // │ 1 2 3 │
+//! // │ 4 5 6 │
+//! // └───────┘
+//! ```
+//! ### Indexing
+//! ```
+//! use static_la::MatrixDxS;
+//! let a = MatrixDxS::from(vec![[1, 2, 3], [4, 5, 6]]);
+//! assert_eq!(a[(0,0)], 1);
+//! assert_eq!(a[(0,1)], 2);
+//! assert_eq!(a[(0,2)], 3);
+//! assert_eq!(a[(1,0)], 4);
+//! assert_eq!(a[(1,1)], 5);
+//! assert_eq!(a[(1,2)], 6);
+//! ```
+//! ### Expansion
+//! ```ignore
+//! use std::convert::TryFrom;
+//! use static_la::*;
+//! let a = MatrixDxD::try_from(vec![vec![1, 2]]).unwrap();
+//! // ┌─────┐
+//! // │ 1 2 │
+//! // └─────┘
+//! let b = a.add_rows(MatrixDxS::from(vec![[4, 5]]));
+//! // ┌─────┐
+//! // │ 1 2 │
+//! // │ 4 5 │
+//! // └─────┘
+//! let c = b.add_columns(MatrixSxS::from([[3], [6]]));
+//! // ┌───────┐
+//! // │ 1 2 3 │
+//! // │ 4 5 6 │
+//! // └───────┘
+//! assert_eq!(c,MatrixSxD::try_from([vec![1, 2, 3], vec![4, 5, 6]]).unwrap());
+//! ```
+//! ### Arithmetic
+//! ```ignore
+//! use std::convert::TryFrom;
+//! use static_la::*;
+//! let a = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
+//! let mut b = a + MatrixDxS::from(vec![[7, 8, 9], [10, 11, 12]]);
+//! assert_eq!(b, MatrixDxS::from(vec![[8, 10, 12], [14, 16, 18]]));
+//! b -= MatrixDxS::from(vec![[3, 6, 9], [12, 15, 18]]);
+//! assert_eq!(b, MatrixDxS::from(vec![[5, 4, 3], [2, 1, 0]]));
+//! let c = b * MatrixSxS::from([[2, 2, 2], [3, 3, 3]]);
+//! assert_eq!(c, MatrixSxS::from([[10, 8, 6], [6, 3, 0]]));
+//! ```
 
 /// [`std::ops::Add`] Arithmetic addition operations.
 mod add;
@@ -61,6 +115,8 @@ mod div_assign;
 mod fmt;
 /// [`std::convert::From`] Value-to-value conversions.
 mod from;
+/// [`std::ops::Index`] Indexing operations.
+mod index;
 /// Iterations functionality.
 mod iter;
 /// Matrix multiplication functionality.
@@ -348,12 +404,14 @@ pub type RowVectorD<T> = MatrixSxD<T, 1>;
 /// ```
 pub type RowVectorS<T, const COLUMNS: usize> = MatrixSxS<T, 1, COLUMNS>;
 
+// These tests performs the tests that are ignored in the rustdoc.
+// They are ignored in rustdoc as they cause compiler errors.
 #[cfg(test)]
 mod tests {
     use crate::*;
-    // This test performs the same test that is ignored in the rustdoc.
+    use std::convert::TryFrom;
     #[test]
-    fn special() {
+    fn rustdoc1() {
         // MatrixSxS<i32,2,3>
         let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
         // MatrixDxS<i32,3>
@@ -366,5 +424,25 @@ mod tests {
         let e = MatrixSxS::from([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]);
         // MatrixSxS<i32,4,6>
         let _f = d.add_columns(e);
+    }
+    #[test]
+    fn rustdoc2() {
+        let a = MatrixDxD::try_from(vec![vec![1, 2]]).unwrap();
+        let b = a.add_rows(MatrixDxS::from(vec![[4, 5]]));
+        let c = b.add_columns(MatrixSxS::from([[3], [6]]));
+        assert_eq!(
+            c,
+            MatrixSxD::try_from([vec![1, 2, 3], vec![4, 5, 6]]).unwrap()
+        );
+    }
+    #[test]
+    fn rustdoc3() {
+        let a = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
+        let mut b = a + MatrixDxS::from(vec![[7, 8, 9], [10, 11, 12]]);
+        assert_eq!(b, MatrixDxS::from(vec![[8, 10, 12], [14, 16, 18]]));
+        b -= MatrixDxS::from(vec![[3, 6, 9], [12, 15, 18]]);
+        assert_eq!(b, MatrixDxS::from(vec![[5, 4, 3], [2, 1, 0]]));
+        let c = b * MatrixSxS::from([[2, 2, 2], [3, 3, 3]]);
+        assert_eq!(c, MatrixSxS::from([[10, 8, 6], [6, 3, 0]]));
     }
 }
