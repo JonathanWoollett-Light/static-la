@@ -13,13 +13,13 @@ type Slice = (Range<usize>, Range<usize>);
 /// A trait for dynamic slicing along rows and dynamic slicing along columns.
 pub trait SliceDxD<T> {
     /// Given a range of rows and a range of columns returns a [`MatrixDxD`] holding
-    ///  references to the value within the ranges.
+    ///  references to the values within the ranges.
     fn slice_dxd(&self, slice: Slice) -> MatrixDxD<&T>;
 }
 /// A trait for dynamic slicing along rows and static slicing along columns.
 pub trait SliceDxS<T> {
     /// Given a range of rows and a constant range of columns returns a [`MatrixDxS`] holding
-    ///  references to the value within the ranges.
+    ///  references to the values within the ranges.
     fn slice_dxs<const COLUMNS: Range<usize>>(
         &self,
         rows: Range<usize>,
@@ -28,7 +28,7 @@ pub trait SliceDxS<T> {
 /// A trait for static slicing along rows and dynamic slicing along columns.
 pub trait SliceSxD<T> {
     /// Given a constant range of rows and a range of columns returns a [`MatrixSxD`] holding
-    ///  references to the value within the ranges.
+    ///  references to the values within the ranges.
     fn slice_sxd<const ROWS: Range<usize>>(
         &self,
         columns: Range<usize>,
@@ -37,7 +37,7 @@ pub trait SliceSxD<T> {
 /// A trait for static slicing along rows and static slicing along columns.
 pub trait SliceSxS<T> {
     /// Given a constant range of rows and a constant range of columns returns a [`MatrixSxS`]
-    ///  holding references to the value within the ranges.
+    ///  holding references to the values within the ranges.
     fn slice_sxs<const ROWS: Range<usize>, const COLUMNS: Range<usize>>(
         &self,
     ) -> MatrixSxS<&T, { range_len(ROWS) }, { range_len(COLUMNS) }>
