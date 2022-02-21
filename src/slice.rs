@@ -1,5 +1,8 @@
 use crate::*;
-use std::{convert::TryInto, ops::Range};
+use std::{
+    convert::{TryFrom, TryInto},
+    ops::Range,
+};
 
 /// Internal function used for const slice sizing.
 pub const fn range_len(a: Range<usize>) -> usize {
@@ -494,6 +497,7 @@ where
 #[cfg(test)]
 mod tests {
     use crate::*;
+    use std::convert::TryFrom;
     // MatrixDxD
     // --------------------------------------------------
     #[test]

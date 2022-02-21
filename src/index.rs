@@ -82,6 +82,7 @@ where
 #[cfg(test)]
 mod tests {
     use crate::*;
+    use std::convert::TryFrom;
     // MatrixDxD
     // --------------------------------------------------
     #[test]

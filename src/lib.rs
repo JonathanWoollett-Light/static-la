@@ -137,6 +137,14 @@
 //! assert_eq!(a.slice_sxd::<{ 0..1 }>(0..2), MatrixSxD::try_from([vec![&1, &2]]).unwrap());
 //! assert_eq!(a.slice_sxs::<{ 0..1 }, { 0..2 }>(), MatrixSxS::from([[&1, &2]]));
 //! ```
+//! ### Transpose
+//! ```
+//! use static_la::MatrixSxS;
+//! let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
+//! let b = a.transpose_ref(); // Please see docs
+//! let c = a.transpose();
+//! assert_eq!(c,MatrixSxS::<i32,3,2>::from([[1, 4], [2, 5],[3, 6]]));
+//! ```
 
 /// [`std::ops::Add`] Arithmetic addition operations.
 mod add;
@@ -172,6 +180,8 @@ mod partial_eq;
 /// Slicing functionality.
 mod slice;
 pub use slice::*;
+/// Implementations relating to dimensions of matrices.
+mod dims;
 /// Constructing matrices with random values functionality.
 #[doc(cfg(feature = "distribution"))]
 #[cfg(feature = "distribution")]
@@ -180,12 +190,13 @@ mod distribution;
 mod sub;
 /// [`std::ops::SubAssign`] Arithmetic subtraction operations.
 mod sub_assign;
+/// Implementations relating to summations over matrices.
+mod sums;
 /// Transpose functionality.
 mod transpose;
+pub use transpose::*;
 /// [`std::convert::TryFrom`] Fallible value-to-value conversions.
 mod try_from;
-
-use std::convert::TryFrom;
 
 // Matrix types
 // --------------------------------------------------
@@ -201,49 +212,6 @@ pub struct MatrixDxD<T> {
     columns: usize,
     rows: usize,
 }
-impl<T> MatrixDxD<T> {
-    /// Number of elements in matrix.
-    pub fn len(&self) -> usize {
-        self.data.len()
-    }
-    /// Number of columns.
-    pub fn columns(&self) -> usize {
-        self.columns
-    }
-    /// Number of rows.
-    pub fn rows(&self) -> usize {
-        self.rows
-    }
-}
-impl<T: std::iter::Sum<T> + Clone> MatrixDxD<T> {
-    /// Gets sum of all elements.
-    pub fn sum(&self) -> T {
-        self.data.iter().cloned().sum()
-    }
-    /// Gets the sum of each row.
-    pub fn row_sum(&self) -> ColumnVectorD<T> {
-        ColumnVectorD::from(
-            self.data
-                .chunks_exact(self.columns)
-                .map(|r| [r.iter().cloned().sum()])
-                .collect::<Vec<_>>(),
-        )
-    }
-    /// Gets the sum of each column.
-    pub fn column_sum(&self) -> RowVectorD<T> {
-        RowVectorD::try_from([(0..self.columns)
-            .map(|i| {
-                self.data
-                    .iter()
-                    .skip(i)
-                    .step_by(self.columns)
-                    .cloned()
-                    .sum()
-            })
-            .collect::<Vec<_>>()])
-        .unwrap()
-    }
-}
 /// A `dynamic x static` matrix where the columns dimension is known at compile time.
 /// ```
 /// let _ = static_la::MatrixDxS::from(vec![[1, 2, 3], [4, 5, 6]]);
@@ -253,48 +221,6 @@ pub struct MatrixDxS<T, const COLUMNS: usize> {
     /// Underlying data.
     data: Vec<T>,
     rows: usize,
-}
-impl<T, const COLUMNS: usize> MatrixDxS<T, COLUMNS> {
-    /// Number of elements in matrix.
-    pub fn len(&self) -> usize {
-        self.data.len()
-    }
-    /// Number of columns.
-    pub const fn columns(&self) -> usize {
-        COLUMNS
-    }
-    /// Number of rows.
-    pub fn rows(&self) -> usize {
-        self.rows
-    }
-}
-impl<T: std::iter::Sum<T> + Copy + Default + std::fmt::Debug, const COLUMNS: usize>
-    MatrixDxS<T, COLUMNS>
-where
-    [(); 1 * COLUMNS]:,
-{
-    /// Gets sum of all elements.
-    pub fn sum(&self) -> T {
-        self.data.iter().cloned().sum()
-    }
-    /// Gets the sum of each row.
-    pub fn row_sum(&self) -> ColumnVectorD<T> {
-        ColumnVectorD::from(
-            self.data
-                .chunks_exact(COLUMNS)
-                .map(|r| [r.iter().cloned().sum()])
-                .collect::<Vec<_>>(),
-        )
-    }
-    /// Gets the sum of each column.
-    pub fn column_sum(&self) -> RowVectorS<T, COLUMNS> {
-        // Will dropping the `Default` and `Copy` traits to use `try_into` affect performance?
-        let mut sums: [T; COLUMNS] = [Default::default(); COLUMNS];
-        for i in 0..COLUMNS {
-            sums[i] = self.data.iter().skip(i).step_by(COLUMNS).cloned().sum();
-        }
-        RowVectorS::from([sums])
-    }
 }
 /// A `static x dynamic` matrix where the rows dimension is known at compile time.
 /// ```
@@ -307,52 +233,6 @@ pub struct MatrixSxD<T, const ROWS: usize> {
     data: Vec<T>,
     columns: usize,
 }
-impl<T, const ROWS: usize> MatrixSxD<T, ROWS> {
-    /// Number of elements in matrix.
-    pub fn len(&self) -> usize {
-        self.data.len()
-    }
-    /// Number of rows.
-    pub const fn rows(&self) -> usize {
-        ROWS
-    }
-    /// Number of columns.
-    pub fn columns(&self) -> usize {
-        self.columns
-    }
-}
-
-impl<T: std::iter::Sum<T> + Copy + Default + std::fmt::Debug, const ROWS: usize> MatrixSxD<T, ROWS>
-where
-    [(); ROWS * 1]:,
-{
-    /// Gets sum of all elements.
-    pub fn sum(&self) -> T {
-        self.data.iter().cloned().sum()
-    }
-    /// Gets the sum of each row.
-    pub fn row_sum(&self) -> ColumnVectorS<T, ROWS> {
-        let mut sums: [[T; 1]; ROWS] = [[Default::default(); 1]; ROWS];
-        for (i, row) in (0..ROWS).zip(self.data.chunks_exact(self.columns)) {
-            sums[i][0] = row.iter().cloned().sum();
-        }
-        ColumnVectorS::from(sums)
-    }
-    /// Gets the sum of each column.
-    pub fn column_sum(&self) -> RowVectorD<T> {
-        RowVectorD::try_from([(0..self.columns)
-            .map(|i| {
-                self.data
-                    .iter()
-                    .skip(i)
-                    .step_by(self.columns)
-                    .cloned()
-                    .sum()
-            })
-            .collect::<Vec<_>>()])
-        .unwrap()
-    }
-}
 /// A `static x static` matrix where both dimensions are known at compile time.
 /// ```
 /// let _ = static_la::MatrixSxS::<i32,2,3>::from([[1, 2, 3], [4, 5, 6]]);
@@ -364,54 +244,6 @@ where
 {
     /// Underlying data.
     data: [T; ROWS * COLUMNS],
-}
-impl<T, const ROWS: usize, const COLUMNS: usize> MatrixSxS<T, ROWS, COLUMNS>
-where
-    [(); ROWS * COLUMNS]:,
-{
-    /// Number of elements in matrix.
-    pub const fn len(&self) -> usize {
-        ROWS * COLUMNS
-    }
-    /// Number of rows.
-    pub const fn rows(&self) -> usize {
-        ROWS
-    }
-    /// Number of columns.
-    pub const fn columns(&self) -> usize {
-        COLUMNS
-    }
-}
-impl<
-        T: std::iter::Sum<T> + Copy + Default + std::fmt::Debug,
-        const ROWS: usize,
-        const COLUMNS: usize,
-    > MatrixSxS<T, ROWS, COLUMNS>
-where
-    [(); ROWS * COLUMNS]:,
-    [(); ROWS * 1]:,
-    [(); 1 * COLUMNS]:,
-{
-    /// Gets sum of all elements.
-    pub fn sum(&self) -> T {
-        self.data.iter().cloned().sum()
-    }
-    /// Gets the sum of each row.
-    pub fn row_sum(&self) -> ColumnVectorS<T, ROWS> {
-        let mut sums: [[T; 1]; ROWS] = [[Default::default(); 1]; ROWS];
-        for (i, row) in (0..ROWS).zip(self.data.chunks_exact(COLUMNS)) {
-            sums[i][0] = row.iter().cloned().sum();
-        }
-        ColumnVectorS::from(sums)
-    }
-    /// Gets the sum of each column.
-    pub fn column_sum(&self) -> RowVectorS<T, COLUMNS> {
-        let mut sums: [T; COLUMNS] = [Default::default(); COLUMNS];
-        for i in 0..COLUMNS {
-            sums[i] = self.data.iter().skip(i).step_by(COLUMNS).cloned().sum();
-        }
-        RowVectorS::from([sums])
-    }
 }
 // Vector aliases
 // --------------------------------------------------
