@@ -179,7 +179,7 @@ mod mul_assign;
 mod partial_eq;
 /// Slicing functionality.
 mod slice;
-pub use slice::*;
+pub use slice::{SliceDxD,SliceDxS,SliceSxD,SliceSxS};
 /// Implementations relating to dimensions of matrices.
 mod dims;
 /// Constructing matrices with random values functionality.
