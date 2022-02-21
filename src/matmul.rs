@@ -31,8 +31,8 @@ fn matmul<T: Debug + Mul<Output = T> + AddAssign + Copy + Debug>(
     debug_assert_eq!(c.len(), l_len * n_len);
 
     for l in 0..l_len {
-        for n in 0..n_len {
-            for m in 0..m_len {
+        for m in 0..m_len {
+            for n in 0..n_len {
                 let (i, j, k) = (l * n_len + n, l * m_len + m, m * n_len + n);
                 c[i] += a[j] * b[k];
                 // c[l][n] += a[l][m] * b[m][n];
