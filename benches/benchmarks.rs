@@ -531,27 +531,19 @@ fn _matmul_benchmark(c: &mut Criterion) {
     // --------------------------------------------------
     let a = MatrixDxD::try_from(vec![vec![1, 3, 5], vec![2, 4, 6]]).unwrap();
     let b = MatrixDxD::try_from(vec![vec![7, 10], vec![8, 11], vec![9, 12]]).unwrap();
-    group.bench_function("MatrixDxD matmul (s)", |bench| {
-        bench.iter(|| a.clone().matmul(b.clone()))
-    });
+    group.bench_function("MatrixDxD matmul (s)", |bench| bench.iter(|| a.matmul(&b)));
 
     let a = MatrixDxS::from(vec![[1, 3, 5], [2, 4, 6]]);
     let b = MatrixDxS::from(vec![[7, 10], [8, 11], [9, 12]]);
-    group.bench_function("MatrixDxS matmul (s)", |bench| {
-        bench.iter(|| a.clone().matmul(b.clone()))
-    });
+    group.bench_function("MatrixDxS matmul (s)", |bench| bench.iter(|| a.matmul(&b)));
 
     let a = MatrixSxD::try_from([vec![1, 3, 5], vec![2, 4, 6]]).unwrap();
     let b = MatrixSxD::try_from([vec![7, 10], vec![8, 11], vec![9, 12]]).unwrap();
-    group.bench_function("MatrixSxD matmul (s)", |bench| {
-        bench.iter(|| a.clone().matmul(b.clone()))
-    });
+    group.bench_function("MatrixSxD matmul (s)", |bench| bench.iter(|| a.matmul(&b)));
 
     let a = MatrixSxS::from([[1, 3, 5], [2, 4, 6]]);
     let b = MatrixSxS::from([[7, 10], [8, 11], [9, 12]]);
-    group.bench_function("MatrixSxS matmul (s)", |bench| {
-        bench.iter(|| a.clone().matmul(b.clone()))
-    });
+    group.bench_function("MatrixSxS matmul (s)", |bench| bench.iter(|| a.matmul(&b)));
 
     // Large
     // --------------------------------------------------
@@ -569,9 +561,7 @@ fn _matmul_benchmark(c: &mut Criterion) {
             .collect::<Vec<_>>(),
     )
     .unwrap();
-    group.bench_function("MatrixDxD matmul (l)", |bench| {
-        bench.iter(|| a.clone().matmul(b.clone()))
-    });
+    group.bench_function("MatrixDxD matmul (l)", |bench| bench.iter(|| a.matmul(&b)));
 
     let a = MatrixDxS::<_, LARGE>::from({
         let c: Vec<[f32; LARGE]> = (0..LARGE)
@@ -597,9 +587,7 @@ fn _matmul_benchmark(c: &mut Criterion) {
             .collect::<Vec<[f32; LARGE]>>();
         c
     });
-    group.bench_function("MatrixDxS matmul (l)", |bench| {
-        bench.iter(|| a.clone().matmul(b.clone()))
-    });
+    group.bench_function("MatrixDxS matmul (l)", |bench| bench.iter(|| a.matmul(&b)));
 
     let a = MatrixSxD::try_from({
         let c: [Vec<f32>; LARGE] = (0..LARGE)
@@ -619,9 +607,7 @@ fn _matmul_benchmark(c: &mut Criterion) {
         c
     })
     .unwrap();
-    group.bench_function("MatrixSxD matmul (l)", |bench| {
-        bench.iter(|| a.clone().matmul(b.clone()))
-    });
+    group.bench_function("MatrixSxD matmul (l)", |bench| bench.iter(|| a.matmul(&b)));
 
     let a = MatrixSxS::<f32, LARGE, LARGE>::from({
         let c: [[f32; LARGE]; LARGE] = (0..LARGE)
@@ -653,9 +639,7 @@ fn _matmul_benchmark(c: &mut Criterion) {
             .unwrap();
         c
     });
-    group.bench_function("MatrixSxS matmul (l)", |bench| {
-        bench.iter(|| a.clone().matmul(b.clone()))
-    });
+    group.bench_function("MatrixSxS matmul (l)", |bench| bench.iter(|| a.matmul(&b)));
 }
 
 fn sum_benchmark(c: &mut Criterion) {
@@ -842,12 +826,11 @@ fn dynamic_div_comparison(c: &mut Criterion) {
             let y = ndarray_rand(i, i);
             b.iter(|| x.clone() / y.clone())
         });
-        // nalgebra doesn't support div here for some reason.
-        // group.bench_with_input(BenchmarkId::new("nalgebra", i), &i, |b, &i| {
-        //     let x = nalgebra_rand(i,i);
-        //     let y = nalgebra_rand(i,i);
-        //     b.iter(|| x.clone() / y.clone())
-        // });
+        group.bench_with_input(BenchmarkId::new("nalgebra", i), &i, |b, &i| {
+            let x = nalgebra_rand(i, i);
+            let y = nalgebra_rand(i, i);
+            b.iter(|| x.component_div(&y))
+        });
         group.bench_with_input(BenchmarkId::new("static-la", i), &i, |b, &i| {
             let x = static_la_rand(i, i);
             let y = static_la_rand(i, i);
@@ -865,10 +848,11 @@ fn dynamic_mul_comparison(c: &mut Criterion) {
             let y = ndarray_rand(i, i);
             b.iter(|| x.clone() * y.clone())
         });
+        // TODO W
         group.bench_with_input(BenchmarkId::new("nalgebra", i), &i, |b, &i| {
             let x = nalgebra_rand(i, i);
             let y = nalgebra_rand(i, i);
-            b.iter(|| x.clone() * y.clone())
+            b.iter(|| x.component_mul(&y))
         });
         group.bench_with_input(BenchmarkId::new("static-la", i), &i, |b, &i| {
             let x = static_la_rand(i, i);
@@ -877,7 +861,37 @@ fn dynamic_mul_comparison(c: &mut Criterion) {
         });
     }
 }
-
+fn dynamic_matmul_comparison(c: &mut Criterion) {
+    let mut group = c.benchmark_group("Matrix multiplication");
+    group.warm_up_time(std::time::Duration::from_millis(50));
+    group.measurement_time(std::time::Duration::from_millis(400));
+    for i in 10..100 {
+        group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
+            let x = ndarray_rand(i, i);
+            let y = ndarray_rand(i, i);
+            b.iter(|| x.dot(&y))
+        });
+        group.bench_with_input(BenchmarkId::new("nalgebra", i), &i, |b, &i| {
+            let x = nalgebra_rand(i, i);
+            let y = nalgebra_rand(i, i);
+            b.iter(|| x.clone() * y.clone())
+        });
+        group.bench_with_input(BenchmarkId::new("static-la", i), &i, |b, &i| {
+            let x = static_la_rand(i, i);
+            let y = static_la_rand(i, i);
+            b.iter(|| x.matmul(&y))
+        });
+    }
+}
+// fn simple_matmul_benchmark(c: &mut Criterion) {
+//     let a = static_la_rand(50, 50);
+//     let b = static_la_rand(50, 50);
+//     c.bench_function("Simple matmul", |bench| {
+//         bench.iter(|| a.clone().matmul(b.clone()))
+//     });
+// }
+// criterion_group!(benches,simple_matmul_benchmark);
+// criterion_group!(benches, dynamic_matmul_comparison);
 criterion_group!(
     benches,
     add_benchmark,
@@ -889,6 +903,7 @@ criterion_group!(
     dynamic_add_comparison,
     dynamic_sub_comparison,
     dynamic_mul_comparison,
-    dynamic_div_comparison
+    dynamic_div_comparison,
+    dynamic_matmul_comparison
 );
 criterion_main!(benches);

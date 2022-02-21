@@ -49,3 +49,4 @@ The x axis refers to the size of the matrices e.g. 50 refers to 50x50 matrices.
 <img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/sub.svg" width="700">
 <img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/mul.svg" width="700">
 <img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/div.svg" width="700">
+<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/matmul.svg" width="700">
