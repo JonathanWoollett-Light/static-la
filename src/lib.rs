@@ -205,6 +205,8 @@ mod bitor;
 mod bitor_assign;
 /// [`std::ops::BitXor`] Bitwise XOR operation.
 mod bitxor;
+/// [`std::ops::BitXorAssign`] Bitwise XOR assignment operation.
+mod bitxor_assign;
 /// [`std::ops::Neg`] Negation operations.
 mod neg;
 /// [`std::ops::Not`] Bitwise NOT operations.
