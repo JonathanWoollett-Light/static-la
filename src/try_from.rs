@@ -1,7 +1,9 @@
 use crate::*;
 use std::convert::TryFrom;
 
-impl<T: Clone> TryFrom<Vec<Vec<T>>> for MatrixDxD<T> {
+// MatrixDxD
+// --------------------------------------------------
+impl<T> TryFrom<Vec<Vec<T>>> for MatrixDxD<T> {
     type Error = &'static str;
     fn try_from(data: Vec<Vec<T>>) -> Result<Self, Self::Error> {
         // If it contains some rows.
@@ -12,13 +14,30 @@ impl<T: Clone> TryFrom<Vec<Vec<T>>> for MatrixDxD<T> {
                 return Err("Inside `Vec`s differ in length.");
             }
         }
+        let (rows, columns) = (data.len(), data[0].len());
         Ok(Self {
-            data: data.iter().cloned().flatten().collect::<Vec<_>>(),
-            rows: data.len(),
-            columns: data[0].len(),
+            data: data.into_iter().flatten().collect::<Vec<_>>(),
+            rows,
+            columns,
         })
     }
 }
+impl<T> TryFrom<(usize, usize, Vec<T>)> for MatrixDxD<T> {
+    type Error = &'static str;
+    fn try_from((rows, columns, data): (usize, usize, Vec<T>)) -> Result<Self, Self::Error> {
+        if rows * columns == data.len() {
+            Ok(Self {
+                data: data,
+                rows,
+                columns,
+            })
+        } else {
+            Err("Inside `Vec`s differ in length.")
+        }
+    }
+}
+// MatrixSxD
+// --------------------------------------------------
 impl<T: Clone, const ROWS: usize> TryFrom<[Vec<T>; ROWS]> for MatrixSxD<T, ROWS> {
     type Error = &'static str;
     fn try_from(data: [Vec<T>; ROWS]) -> Result<Self, Self::Error> {
@@ -34,5 +53,30 @@ impl<T: Clone, const ROWS: usize> TryFrom<[Vec<T>; ROWS]> for MatrixSxD<T, ROWS>
             data: data.concat(),
             columns: data[0].len(),
         })
+    }
+}
+impl<T, const ROWS: usize> TryFrom<(usize, Vec<T>)> for MatrixSxD<T, ROWS> {
+    type Error = &'static str;
+    fn try_from((columns, data): (usize, Vec<T>)) -> Result<Self, Self::Error> {
+        if ROWS * columns == data.len() {
+            Ok(Self {
+                data: data,
+                columns,
+            })
+        } else {
+            Err("Inside `Vec`s differ in length.")
+        }
+    }
+}
+// MatrixDxS
+// --------------------------------------------------
+impl<T, const COLUMNS: usize> TryFrom<(usize, Vec<T>)> for MatrixDxS<T, COLUMNS> {
+    type Error = &'static str;
+    fn try_from((rows, data): (usize, Vec<T>)) -> Result<Self, Self::Error> {
+        if COLUMNS * rows == data.len() {
+            Ok(Self { data: data, rows })
+        } else {
+            Err("Inside `Vec`s differ in length.")
+        }
     }
 }
