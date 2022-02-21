@@ -8,6 +8,8 @@ type Pair = (usize, usize);
 impl<T> Index<Pair> for MatrixDxD<T> {
     type Output = T;
     fn index<'a>(&'a self, (row, column): (usize, usize)) -> &'a Self::Output {
+        assert!(row < self.rows, "Row out of bounds");
+        assert!(column < self.columns, "Columns out of bounds");
         &self.data[row * self.columns + column]
     }
 }
@@ -16,6 +18,8 @@ impl<T> Index<Pair> for MatrixDxD<T> {
 impl<T, const COLUMNS: usize> Index<Pair> for MatrixDxS<T, COLUMNS> {
     type Output = T;
     fn index<'a>(&'a self, (row, column): (usize, usize)) -> &'a Self::Output {
+        assert!(row < self.rows, "Row out of bounds");
+        assert!(column < COLUMNS, "Columns out of bounds");
         &self.data[row * COLUMNS + column]
     }
 }
@@ -24,6 +28,8 @@ impl<T, const COLUMNS: usize> Index<Pair> for MatrixDxS<T, COLUMNS> {
 impl<T, const ROWS: usize> Index<Pair> for MatrixSxD<T, ROWS> {
     type Output = T;
     fn index<'a>(&'a self, (row, column): (usize, usize)) -> &'a Self::Output {
+        assert!(row < ROWS, "Row out of bounds");
+        assert!(column < self.columns, "Columns out of bounds");
         &self.data[row * self.columns + column]
     }
 }
@@ -35,10 +41,13 @@ where
 {
     type Output = T;
     fn index<'a>(&'a self, (row, column): (usize, usize)) -> &'a Self::Output {
+        assert!(row < ROWS, "Row out of bounds");
+        assert!(column < COLUMNS, "Columns out of bounds");
         &self.data[row * COLUMNS + column]
     }
 }
-
+// Tests
+// --------------------------------------------------
 #[cfg(test)]
 mod tests {
     use crate::*;

@@ -2,6 +2,7 @@
 #![feature(generic_const_exprs)]
 #![feature(array_methods)]
 #![feature(array_chunks)]
+#![feature(adt_const_params)]
 //! An extremely minimal super static type safe implementation of matrix types.
 //!
 //! While [`ndarray`](https://docs.rs/ndarray/latest/ndarray/) offers no compile time type checking
@@ -96,6 +97,16 @@
 //! let c = b * MatrixSxS::from([[2, 2, 2], [3, 3, 3]]);
 //! assert_eq!(c, MatrixSxS::from([[10, 8, 6], [6, 3, 0]]));
 //! ```
+//! ### Slicing
+//! ```ignore
+//! use std::convert::TryFrom;
+//! use static_la::*;
+//! let a = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
+//! assert_eq!(a.slice_dxd((0..1, 0..2)), MatrixDxD::try_from(vec![vec![&1, &2]]).unwrap());
+//! assert_eq!(a.slice_dxs::<{ 0..2 }>(0..1), MatrixDxS::from(vec![[&1, &2]]));
+//! assert_eq!(a.slice_sxd::<{ 0..1 }>(0..2), MatrixSxD::try_from([vec![&1, &2]]).unwrap());
+//! assert_eq!(a.slice_sxs::<{ 0..1 }, { 0..2 }>(), MatrixSxS::from([[&1, &2]]));
+//! ```
 
 /// [`std::ops::Add`] Arithmetic addition operations.
 mod add;
@@ -121,19 +132,22 @@ mod index;
 mod iter;
 /// Matrix multiplication functionality.
 mod matmul;
+pub use matmul::Matmul;
 /// [`std::ops::Mul`] Arithmetic multiplication operations.
 mod mul;
 /// [`std::ops::MulAssign`] Arithmetic multiplication operations.
 mod mul_assign;
 /// [`std::cmp::PartialEq`] Partial equality comparison operations.
 mod partial_eq;
+/// Slicing functionality.
+mod slice;
+pub use slice::*;
 /// [`std::ops::Sub`] Arithmetic subtraction operations.
 mod sub;
 /// [`std::ops::SubAssign`] Arithmetic subtraction operations.
 mod sub_assign;
 /// [`std::convert::TryFrom`] Fallible value-to-value conversions.
 mod try_from;
-pub use matmul::Matmul;
 
 // Matrix types
 // --------------------------------------------------
@@ -444,5 +458,25 @@ mod tests {
         assert_eq!(b, MatrixDxS::from(vec![[5, 4, 3], [2, 1, 0]]));
         let c = b * MatrixSxS::from([[2, 2, 2], [3, 3, 3]]);
         assert_eq!(c, MatrixSxS::from([[10, 8, 6], [6, 3, 0]]));
+    }
+    #[test]
+    fn rustdoc4() {
+        let a = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
+        assert_eq!(
+            a.slice_dxd((0..1, 0..2)),
+            MatrixDxD::try_from(vec![vec![&1, &2]]).unwrap()
+        );
+        assert_eq!(
+            a.slice_dxs::<{ 0..2 }>(0..1),
+            MatrixDxS::from(vec![[&1, &2]])
+        );
+        assert_eq!(
+            a.slice_sxd::<{ 0..1 }>(0..2),
+            MatrixSxD::try_from([vec![&1, &2]]).unwrap()
+        );
+        assert_eq!(
+            a.slice_sxs::<{ 0..1 }, { 0..2 }>(),
+            MatrixSxS::from([[&1, &2]])
+        );
     }
 }
