@@ -1,5 +1,4 @@
 use crate::*;
-use std::convert::TryInto;
 
 /// A trait allowing the combination of matrices along their column axis.
 pub trait AddColumns<T> {
@@ -20,19 +19,25 @@ pub trait AddColumns<T> {
 impl<T: Clone + Default + Copy, const ROWS: usize, const COLUMNS: usize, const C: usize>
     AddColumns<MatrixDxS<T, C>> for MatrixSxS<T, ROWS, COLUMNS>
 where
-    [(); COLUMNS + C]:,
+    [(); ROWS * COLUMNS]:,
+    [(); ROWS * { COLUMNS + C }]:,
 {
     type Output = MatrixSxS<T, ROWS, { COLUMNS + C }>;
     fn add_columns(self, columns: MatrixDxS<T, C>) -> Self::Output {
-        assert_eq!(ROWS, columns.data.len(), "Non-matching rows");
-        let mut data = [[Default::default(); { COLUMNS + C }]; ROWS];
+        assert_eq!(ROWS, columns.rows, "Non-matching rows");
+        let mut data = [Default::default(); ROWS * { COLUMNS + C }];
 
-        for i in 0..ROWS {
-            // TODOl: Use assignment here.
+        for (new_column, (old_column, add_column)) in
+            data.array_chunks_mut::<{ COLUMNS + C }>().zip(
+                self.data
+                    .array_chunks::<COLUMNS>()
+                    .zip(columns.data.array_chunks::<C>()),
+            )
+        {
             // Copies old data
-            data[i][..COLUMNS].clone_from_slice(&self.data[i]);
+            new_column[..COLUMNS].clone_from_slice(old_column);
             // Copies new data
-            data[i][COLUMNS..].clone_from_slice(&columns.data[i]);
+            new_column[COLUMNS..].clone_from_slice(add_column);
         }
         Self::Output { data }
     }
@@ -40,33 +45,47 @@ where
 // MatrixSxD
 impl<T: Clone + Default + Copy, const ROWS: usize, const COLUMNS: usize>
     AddColumns<MatrixSxD<T, ROWS>> for MatrixSxS<T, ROWS, COLUMNS>
+where
+    [(); ROWS * COLUMNS]:,
 {
     type Output = MatrixSxD<T, ROWS>;
-    fn add_columns(self, mut columns: MatrixSxD<T, ROWS>) -> Self::Output {
-        for i in 0..ROWS {
-            // Copies old data
-            let mut a = Vec::from(self.data[i].as_slice());
-            // Copies new data
-            a.append(&mut columns.data[i]);
-            columns.data[i] = a;
+    fn add_columns(self, columns: MatrixSxD<T, ROWS>) -> Self::Output {
+        let data = self
+            .data
+            .array_chunks::<COLUMNS>()
+            .zip(columns.data.chunks_exact(columns.columns))
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            columns: COLUMNS + columns.columns,
         }
-        columns
     }
 }
 // MatrixSxS
 impl<T: Clone + Default + Copy, const ROWS: usize, const COLUMNS: usize, const C: usize>
     AddColumns<MatrixSxS<T, ROWS, C>> for MatrixSxS<T, ROWS, COLUMNS>
 where
-    [(); COLUMNS + C]:,
+    [(); ROWS * COLUMNS]:,
+    [(); ROWS * C]:,
+    [(); ROWS * { COLUMNS + C }]:,
 {
     type Output = MatrixSxS<T, ROWS, { COLUMNS + C }>;
     fn add_columns(self, columns: MatrixSxS<T, ROWS, C>) -> Self::Output {
-        let mut data = [[Default::default(); { COLUMNS + C }]; ROWS];
-        for i in 0..ROWS {
+        let mut data = [Default::default(); ROWS * { COLUMNS + C }];
+
+        for (new_column, (old_column, add_column)) in
+            data.array_chunks_mut::<{ COLUMNS + C }>().zip(
+                self.data
+                    .array_chunks::<COLUMNS>()
+                    .zip(columns.data.array_chunks::<C>()),
+            )
+        {
             // Copies old data
-            data[i][..COLUMNS].clone_from_slice(&self.data[i]);
+            new_column[..COLUMNS].clone_from_slice(old_column);
             // Copies new data
-            data[i][COLUMNS..].clone_from_slice(&columns.data[i]);
+            new_column[COLUMNS..].clone_from_slice(add_column);
         }
         Self::Output { data }
     }
@@ -74,22 +93,22 @@ where
 // MatrixDxD
 impl<T: Clone + Default + std::fmt::Debug, const ROWS: usize, const COLUMNS: usize>
     AddColumns<MatrixDxD<T>> for MatrixSxS<T, ROWS, COLUMNS>
+where
+    [(); ROWS * COLUMNS]:,
 {
     type Output = MatrixSxD<T, ROWS>;
     fn add_columns(self, columns: MatrixDxD<T>) -> Self::Output {
-        assert_eq!(ROWS, columns.data.len(), "Non-matching rows");
-        let mut data: [Vec<T>; ROWS] = (0..ROWS)
-            .map(|_| vec![Default::default(); COLUMNS + columns.data[0].len()])
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-        for i in 0..ROWS {
-            // Copies old data
-            data[i][..COLUMNS].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][COLUMNS..].clone_from_slice(&columns.data[i]);
+        let data = self
+            .data
+            .array_chunks::<COLUMNS>()
+            .zip(columns.data.chunks_exact(columns.columns))
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            columns: COLUMNS + columns.columns,
         }
-        Self::Output { data }
     }
 }
 // MatrixSxD
@@ -100,19 +119,17 @@ impl<T: Clone + Default + Copy + std::fmt::Debug, const ROWS: usize> AddColumns<
 {
     type Output = MatrixSxD<T, ROWS>;
     fn add_columns(self, columns: MatrixSxD<T, ROWS>) -> Self::Output {
-        let mut data: [Vec<T>; ROWS] = (0..ROWS)
-            .map(|_| vec![Default::default(); self.data[0].len() + columns.data[0].len()])
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-
-        for i in 0..ROWS {
-            // Copies old data
-            data[i][..self.data[0].len()].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][self.data[0].len()..].clone_from_slice(&columns.data[i]);
+        let data = self
+            .data
+            .chunks_exact(self.columns)
+            .zip(columns.data.chunks_exact(columns.columns))
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            columns: self.columns + columns.columns,
         }
-        Self::Output { data }
     }
 }
 // MatrixDxS
@@ -121,41 +138,39 @@ impl<T: Clone + Default + Copy + std::fmt::Debug, const ROWS: usize, const COLUM
 {
     type Output = MatrixSxD<T, ROWS>;
     fn add_columns(self, columns: MatrixDxS<T, COLUMNS>) -> Self::Output {
-        assert_eq!(ROWS, columns.data.len(), "Non-matching rows");
-        let mut data: [Vec<T>; ROWS] = (0..ROWS)
-            .map(|_| vec![Default::default(); self.data[0].len() + columns.data[0].len()])
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-
-        for i in 0..ROWS {
-            // Copies old data
-            data[i][..self.data[0].len()].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][self.data[0].len()..].clone_from_slice(&columns.data[i]);
+        assert_eq!(ROWS, columns.rows, "Non-matching rows");
+        let data = self
+            .data
+            .chunks_exact(self.columns)
+            .zip(columns.data.array_chunks::<COLUMNS>())
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            columns: self.columns + COLUMNS,
         }
-        Self::Output { data }
     }
 }
 // MatrixSxS
 impl<T: Clone + Default + Copy + std::fmt::Debug, const ROWS: usize, const COLUMNS: usize>
     AddColumns<MatrixSxS<T, ROWS, COLUMNS>> for MatrixSxD<T, ROWS>
+where
+    [(); ROWS * COLUMNS]:,
 {
     type Output = MatrixSxD<T, ROWS>;
     fn add_columns(self, columns: MatrixSxS<T, ROWS, COLUMNS>) -> Self::Output {
-        let mut data: [Vec<T>; ROWS] = (0..ROWS)
-            .map(|_| vec![Default::default(); self.data[0].len() + COLUMNS])
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-
-        for i in 0..ROWS {
-            // Copies old data
-            data[i][..self.data[0].len()].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][self.data[0].len()..].clone_from_slice(&columns.data[i]);
+        let data = self
+            .data
+            .chunks_exact(self.columns)
+            .zip(columns.data.array_chunks::<COLUMNS>())
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            columns: self.columns + COLUMNS,
         }
-        Self::Output { data }
     }
 }
 // MatrixDxD
@@ -164,20 +179,18 @@ impl<T: Clone + Default + std::fmt::Debug, const ROWS: usize> AddColumns<MatrixD
 {
     type Output = MatrixSxD<T, ROWS>;
     fn add_columns(self, columns: MatrixDxD<T>) -> Self::Output {
-        assert_eq!(ROWS, columns.data.len(), "Non-matching rows");
-        let mut data: [Vec<T>; ROWS] = (0..ROWS)
-            .map(|_| vec![Default::default(); self.data[0].len() + columns.data[0].len()])
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-
-        for i in 0..ROWS {
-            // Copies old data
-            data[i][..self.data[0].len()].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][self.data[0].len()..].clone_from_slice(&columns.data[i]);
+        assert_eq!(ROWS, columns.rows, "Non-matching rows");
+        let data = self
+            .data
+            .chunks_exact(self.columns)
+            .zip(columns.data.chunks_exact(columns.columns))
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            columns: self.columns + columns.columns,
         }
-        Self::Output { data }
     }
 }
 // MatrixDxS
@@ -188,20 +201,18 @@ impl<T: Clone + Default + Copy + std::fmt::Debug, const ROWS: usize, const COLUM
 {
     type Output = MatrixSxD<T, ROWS>;
     fn add_columns(self, columns: MatrixSxD<T, ROWS>) -> Self::Output {
-        assert_eq!(self.data.len(), ROWS, "Non-matching rows");
-        let mut data: [Vec<T>; ROWS] = (0..ROWS)
-            .map(|_| vec![Default::default(); COLUMNS + columns.data[0].len()])
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-
-        for i in 0..ROWS {
-            // Copies old data
-            data[i][..COLUMNS].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][COLUMNS..].clone_from_slice(&columns.data[i]);
+        assert_eq!(self.rows, ROWS, "Non-matching rows");
+        let data = self
+            .data
+            .array_chunks::<COLUMNS>()
+            .zip(columns.data.chunks_exact(columns.columns))
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            columns: COLUMNS + columns.columns,
         }
-        Self::Output { data }
     }
 }
 // MatrixDxS
@@ -212,16 +223,18 @@ where
 {
     type Output = MatrixDxS<T, { COLUMNS + C }>;
     fn add_columns(self, columns: MatrixDxS<T, C>) -> Self::Output {
-        assert_eq!(self.data.len(), columns.data.len(), "Non-matching rows");
-        let mut data = vec![[Default::default(); COLUMNS + C]; self.data.len()];
-
-        for i in 0..self.data.len() {
-            // Copies old data
-            data[i][..COLUMNS].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][COLUMNS..].clone_from_slice(&columns.data[i]);
+        assert_eq!(self.rows, columns.rows, "Non-matching rows");
+        let data = self
+            .data
+            .array_chunks::<COLUMNS>()
+            .zip(columns.data.array_chunks::<C>())
+            .map(|(a, b)| [a.as_slice(), b.as_slice()].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            rows: self.rows,
         }
-        Self::Output { data }
     }
 }
 // MatrixSxS
@@ -232,18 +245,25 @@ impl<
         const C: usize,
     > AddColumns<MatrixSxS<T, ROWS, C>> for MatrixDxS<T, COLUMNS>
 where
-    [(); COLUMNS + C]:,
+    [(); ROWS * { COLUMNS + C }]:,
+    [(); ROWS * C]:,
 {
     type Output = MatrixSxS<T, ROWS, { COLUMNS + C }>;
     fn add_columns(self, columns: MatrixSxS<T, ROWS, C>) -> Self::Output {
-        assert_eq!(self.data.len(), ROWS, "Non-matching rows");
-        let mut data = [[Default::default(); COLUMNS + C]; ROWS];
+        assert_eq!(self.rows, ROWS, "Non-matching rows");
+        let mut data = [Default::default(); ROWS * { COLUMNS + C }];
 
-        for i in 0..ROWS {
+        for (new_column, (old_column, add_column)) in
+            data.array_chunks_mut::<{ COLUMNS + C }>().zip(
+                self.data
+                    .array_chunks::<COLUMNS>()
+                    .zip(columns.data.array_chunks::<C>()),
+            )
+        {
             // Copies old data
-            data[i][..COLUMNS].clone_from_slice(&self.data[i]);
+            new_column[..COLUMNS].clone_from_slice(old_column);
             // Copies new data
-            data[i][COLUMNS..].clone_from_slice(&columns.data[i]);
+            new_column[COLUMNS..].clone_from_slice(add_column);
         }
         Self::Output { data }
     }
@@ -254,17 +274,19 @@ impl<T: Clone + Default + std::fmt::Debug, const COLUMNS: usize> AddColumns<Matr
 {
     type Output = MatrixDxD<T>;
     fn add_columns(self, columns: MatrixDxD<T>) -> Self::Output {
-        assert_eq!(self.data.len(), columns.data.len(), "Non-matching rows");
-        let mut data =
-            vec![vec![Default::default(); COLUMNS + columns.data[0].len()]; self.data.len()];
-
-        for i in 0..self.data.len() {
-            // Copies old data
-            data[i][..COLUMNS].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][COLUMNS..].clone_from_slice(&columns.data[i]);
+        assert_eq!(self.rows, columns.rows, "Non-matching rows");
+        let data = self
+            .data
+            .array_chunks::<COLUMNS>()
+            .zip(columns.data.chunks_exact(columns.columns))
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            rows: self.rows,
+            columns: COLUMNS + columns.columns,
         }
-        Self::Output { data }
     }
 }
 // MatrixDxD
@@ -275,23 +297,19 @@ impl<T: Clone + Default + Copy + std::fmt::Debug, const ROWS: usize> AddColumns<
 {
     type Output = MatrixSxD<T, ROWS>;
     fn add_columns(self, columns: MatrixSxD<T, ROWS>) -> Self::Output {
-        assert_eq!(self.data.len(), ROWS, "Non-matching rows");
+        assert_eq!(self.rows, ROWS, "Non-matching rows");
 
-        let ncols = self.data[0].len() + columns.data[0].len();
-        let mut data: [Vec<T>; ROWS] = (0..ROWS)
-            .map(|_| vec![Default::default(); ncols])
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-
-        let cols = self.data[0].len();
-        for i in 0..ROWS {
-            // Copies old data
-            data[i][..cols].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][cols..].clone_from_slice(&columns.data[i]);
+        let data = self
+            .data
+            .chunks_exact(self.columns)
+            .zip(columns.data.chunks_exact(columns.columns))
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            columns: self.columns + columns.columns,
         }
-        Self::Output { data }
     }
 }
 // MatrixDxS
@@ -300,61 +318,60 @@ impl<T: Clone + Default + Copy + std::fmt::Debug, const COLUMNS: usize>
 {
     type Output = MatrixDxD<T>;
     fn add_columns(self, columns: MatrixDxS<T, COLUMNS>) -> Self::Output {
-        assert_eq!(self.data.len(), columns.data.len(), "Non-matching rows");
-
-        let ncols = self.data.len() + COLUMNS;
-        let mut data = vec![vec![Default::default(); ncols]; self.data.len()];
-
-        let cols = self.data.len();
-        for i in 0..self.data.len() {
-            // Copies old data
-            data[i][..cols].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][cols..].clone_from_slice(&columns.data[i]);
+        assert_eq!(self.rows, columns.rows, "Non-matching rows");
+        let data = self
+            .data
+            .chunks_exact(self.columns)
+            .zip(columns.data.array_chunks::<COLUMNS>())
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            rows: self.rows,
+            columns: self.columns + COLUMNS,
         }
-        Self::Output { data }
     }
 }
 // MatrixSxS
 impl<T: Clone + Default + Copy + std::fmt::Debug, const ROWS: usize, const COLUMNS: usize>
     AddColumns<MatrixSxS<T, ROWS, COLUMNS>> for MatrixDxD<T>
+where
+    [(); ROWS * COLUMNS]:,
 {
     type Output = MatrixSxD<T, ROWS>;
     fn add_columns(self, columns: MatrixSxS<T, ROWS, COLUMNS>) -> Self::Output {
-        assert_eq!(self.data.len(), ROWS, "Non-matching rows");
+        assert_eq!(self.rows, ROWS, "Non-matching rows");
 
-        let ncols = self.data[0].len() + columns.data[0].len();
-        let mut data: [Vec<T>; ROWS] = (0..ROWS)
-            .map(|_| vec![Default::default(); ncols])
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-
-        let cols = self.data[0].len();
-        for i in 0..ROWS {
-            // Copies old data
-            data[i][..cols].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][cols..].clone_from_slice(&columns.data[i]);
+        let data = self
+            .data
+            .chunks_exact(self.columns)
+            .zip(columns.data.array_chunks::<COLUMNS>())
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            columns: self.columns + COLUMNS,
         }
-        Self::Output { data }
     }
 }
 // MatrixDxD
 impl<T: Clone + Default + std::fmt::Debug> AddColumns<MatrixDxD<T>> for MatrixDxD<T> {
     type Output = MatrixDxD<T>;
     fn add_columns(self, columns: MatrixDxD<T>) -> Self::Output {
-        assert_eq!(self.data.len(), columns.data.len(), "Non-matching rows");
-        let ncols = self.data[0].len() + columns.data[0].len();
-        let mut data = vec![vec![Default::default(); ncols]; self.data.len()];
-
-        let cols = self.data[0].len();
-        for i in 0..self.data.len() {
-            // Copies old data
-            data[i][..cols].clone_from_slice(&self.data[i]);
-            // Copies new data
-            data[i][cols..].clone_from_slice(&columns.data[i]);
+        assert_eq!(self.rows, columns.rows, "Non-matching rows");
+        let data = self
+            .data
+            .chunks_exact(self.columns)
+            .zip(columns.data.chunks_exact(columns.columns))
+            .map(|(a, b)| [a, b].concat())
+            .flatten()
+            .collect::<Vec<_>>();
+        Self::Output {
+            data,
+            rows: self.rows,
+            columns: self.columns + columns.columns,
         }
-        Self::Output { data }
     }
 }

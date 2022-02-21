@@ -657,6 +657,112 @@ fn matmul_benchmark(c: &mut Criterion) {
     });
 }
 
+fn sum_benchmark(c: &mut Criterion) {
+    let mut group = c.benchmark_group("sum");
+    // group.warm_up_time(std::time::Duration::from_millis(100));
+    // group.measurement_time(std::time::Duration::from_millis(500));
+
+    // Small
+    // --------------------------------------------------
+    let a = MatrixDxD::try_from(vec![vec![1, 3, 5], vec![2, 4, 6]]).unwrap();
+    group.bench_function("MatrixDxD sum (s)", |bench| bench.iter(|| a.sum()));
+    group.bench_function("MatrixDxD row_sum (s)", |bench| bench.iter(|| a.row_sum()));
+    group.bench_function("MatrixDxD column_sum (s)", |bench| {
+        bench.iter(|| a.column_sum())
+    });
+
+    let a = MatrixDxS::from(vec![[1, 3, 5], [2, 4, 6]]);
+    group.bench_function("MatrixDxS sum (s)", |bench| bench.iter(|| a.sum()));
+    group.bench_function("MatrixDxS row_sum (s)", |bench| bench.iter(|| a.row_sum()));
+    group.bench_function("MatrixDxS column_sum (s)", |bench| {
+        bench.iter(|| a.column_sum())
+    });
+
+    let a = MatrixSxD::try_from([vec![1, 3, 5], vec![2, 4, 6]]).unwrap();
+    group.bench_function("MatrixSxD sum (s)", |bench| bench.iter(|| a.sum()));
+    group.bench_function("MatrixSxD row_sum (s)", |bench| bench.iter(|| a.row_sum()));
+    group.bench_function("MatrixSxD column_sum (s)", |bench| {
+        bench.iter(|| a.column_sum())
+    });
+
+    let a = MatrixSxS::from([[1, 3, 5], [2, 4, 6]]);
+    group.bench_function("MatrixSxS sum (s)", |bench| bench.iter(|| a.sum()));
+    group.bench_function("MatrixSxS row_sum (s)", |bench| bench.iter(|| a.row_sum()));
+    group.bench_function("MatrixSxS column_sum (s)", |bench| {
+        bench.iter(|| a.column_sum())
+    });
+
+    // Large
+    // --------------------------------------------------
+    let mut rng = rand::thread_rng();
+
+    let a = MatrixDxD::try_from(
+        (0..LARGE)
+            .map(|_| (0..LARGE).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
+            .collect::<Vec<_>>(),
+    )
+    .unwrap();
+    group.bench_function("MatrixDxD sum (l)", |bench| bench.iter(|| a.sum()));
+    group.bench_function("MatrixDxD row_sum (l)", |bench| bench.iter(|| a.row_sum()));
+    group.bench_function("MatrixDxD column_sum (l)", |bench| {
+        bench.iter(|| a.column_sum())
+    });
+
+    let a = MatrixDxS::<_, LARGE>::from({
+        let c: Vec<[i32; LARGE]> = (0..LARGE)
+            .map(|_| {
+                (0..LARGE)
+                    .map(|_| rng.gen_range(RANGE))
+                    .collect::<Vec<_>>()
+                    .try_into()
+                    .unwrap()
+            })
+            .collect::<Vec<[i32; LARGE]>>();
+        c
+    });
+    group.bench_function("MatrixDxS sum (l)", |bench| bench.iter(|| a.sum()));
+    group.bench_function("MatrixDxS row_sum (l)", |bench| bench.iter(|| a.row_sum()));
+    group.bench_function("MatrixDxS column_sum (l)", |bench| {
+        bench.iter(|| a.column_sum())
+    });
+
+    let a = MatrixSxD::try_from({
+        let c: [Vec<i32>; LARGE] = (0..LARGE)
+            .map(|_| (0..LARGE).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap();
+        c
+    })
+    .unwrap();
+    group.bench_function("MatrixSxD sum (l)", |bench| bench.iter(|| a.sum()));
+    group.bench_function("MatrixSxD row_sum (l)", |bench| bench.iter(|| a.row_sum()));
+    group.bench_function("MatrixSxD column_sum (l)", |bench| {
+        bench.iter(|| a.column_sum())
+    });
+
+    let a = MatrixSxS::<i32, LARGE, LARGE>::from({
+        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+            .map(|_| {
+                let a: [i32; LARGE] = (0..LARGE)
+                    .map(|_| rng.gen_range(RANGE))
+                    .collect::<Vec<_>>()
+                    .try_into()
+                    .unwrap();
+                a
+            })
+            .collect::<Vec<[i32; LARGE]>>()
+            .try_into()
+            .unwrap();
+        c
+    });
+    group.bench_function("MatrixSxS sum (l)", |bench| bench.iter(|| a.sum()));
+    group.bench_function("MatrixSxS row_sum (l)", |bench| bench.iter(|| a.row_sum()));
+    group.bench_function("MatrixSxS column_sum (l)", |bench| {
+        bench.iter(|| a.column_sum())
+    });
+}
+
 use ndarray_rand::rand_distr::Uniform;
 use ndarray_rand::RandomExt;
 
@@ -799,7 +905,8 @@ criterion_group!(
     sub_benchmark,
     div_benchmark,
     mul_benchmark,
-    matmul_benchmark,
+    // matmul_benchmark,
+    sum_benchmark,
     dynamic_add_comparison,
     dynamic_sub_comparison,
     dynamic_mul_comparison,

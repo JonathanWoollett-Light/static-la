@@ -3,6 +3,8 @@ use std::fmt;
 
 impl<T: fmt::Debug, const ROWS: usize, const COLUMNS: usize> fmt::Display
     for MatrixSxS<T, ROWS, COLUMNS>
+where
+    [(); ROWS * COLUMNS]:,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.data)

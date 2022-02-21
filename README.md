@@ -16,9 +16,7 @@ When performing the addition of a `MatrixDxS` (a matrix with a known number of c
  now both the number of rows and columns are known at compile time. This then allows this
  infomation to propagate through your program providing excellent compile time checking.
 
-That being said... I made this in a weekend, there is a tiny amount of functionality and its ~4x slower than [`ndarray`](https://docs.rs/ndarray/latest/ndarray/) and [`nalgebra`](https://docs.rs/nalgebra/latest/nalgebra/).
-
-
+That being said... I made this in a weekend and there is a tiny amount of functionality.
 
 An example of how types will propagate through a program:
 ```rust
@@ -47,6 +45,8 @@ In this example the only operations which cannot be fully checked at compile tim
  - `Matmul::matmul`.
 
 ### Comparisons
+
+*The x axis is the size of the respective matrices**this is not consistent across benchmarks**.*
 
 <img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/add.svg" width="700">
 <img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/sub.svg" width="700">
