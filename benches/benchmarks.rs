@@ -522,7 +522,7 @@ fn mul_benchmark(c: &mut Criterion) {
 }
 
 // This causes compilers error.
-fn _matmul_benchmark(c: &mut Criterion) {
+fn matmul_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("matrix multiplication");
     // group.warm_up_time(std::time::Duration::from_millis(100));
     // group.measurement_time(std::time::Duration::from_millis(500));
@@ -878,17 +878,17 @@ fn dynamic_mul_comparison(c: &mut Criterion) {
     }
 }
 
-criterion_group!(
-    benches,
-    add_benchmark,
-    sub_benchmark,
-    div_benchmark,
-    mul_benchmark,
-    // matmul_benchmark,
-    sum_benchmark,
-    dynamic_add_comparison,
-    dynamic_sub_comparison,
-    dynamic_mul_comparison,
-    dynamic_div_comparison
-);
+criterion_group!(benches, matmul_benchmark);
+// criterion_group!(
+//     benches,
+//     add_benchmark,
+//     sub_benchmark,
+//     div_benchmark,
+//     mul_benchmark,
+//     sum_benchmark,
+//     dynamic_add_comparison,
+//     dynamic_sub_comparison,
+//     dynamic_mul_comparison,
+//     dynamic_div_comparison
+// );
 criterion_main!(benches);
