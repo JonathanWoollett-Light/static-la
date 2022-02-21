@@ -46,7 +46,9 @@ In this example the only operations which cannot be fully checked at compile tim
 
 ### Comparisons
 
-The x axis refers to the size matrices e.g. 50 being 50x50 matrices.
+The numerical type used is `f32`.
+
+The x axis refers to the size of the matrices e.g. 50 refers to 50x50 matrices.
 
 <img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/add.svg" width="700">
 <img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/sub.svg" width="700">

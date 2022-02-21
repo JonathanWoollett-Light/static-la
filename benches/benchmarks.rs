@@ -4,7 +4,7 @@ use static_la::*;
 use std::convert::{TryFrom, TryInto};
 
 const LARGE: usize = 100;
-const RANGE: std::ops::Range<i32> = 1..100;
+const RANGE: std::ops::Range<f32> = 1f32..100f32;
 
 fn add_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("addition");
@@ -97,32 +97,32 @@ fn add_benchmark(c: &mut Criterion) {
         bench.iter(|| a.clone() + b.clone())
     });
 
-    let a = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let a = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
     });
-    let b = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let b = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
@@ -223,32 +223,32 @@ fn sub_benchmark(c: &mut Criterion) {
         bench.iter(|| a.clone() - b.clone())
     });
 
-    let a = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let a = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
     });
-    let b = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let b = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
@@ -349,32 +349,32 @@ fn div_benchmark(c: &mut Criterion) {
         bench.iter(|| a.clone() / b.clone())
     });
 
-    let a = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let a = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
     });
-    let b = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let b = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
@@ -436,7 +436,7 @@ fn mul_benchmark(c: &mut Criterion) {
     });
 
     let a = MatrixDxS::<_, LARGE>::from({
-        let c: Vec<[i32; LARGE]> = (0..LARGE)
+        let c: Vec<[f32; LARGE]> = (0..LARGE)
             .map(|_| {
                 (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
@@ -444,11 +444,11 @@ fn mul_benchmark(c: &mut Criterion) {
                     .try_into()
                     .unwrap()
             })
-            .collect::<Vec<[i32; LARGE]>>();
+            .collect::<Vec<[f32; LARGE]>>();
         c
     });
     let b = MatrixDxS::<_, LARGE>::from({
-        let c: Vec<[i32; LARGE]> = (0..LARGE)
+        let c: Vec<[f32; LARGE]> = (0..LARGE)
             .map(|_| {
                 (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
@@ -456,7 +456,7 @@ fn mul_benchmark(c: &mut Criterion) {
                     .try_into()
                     .unwrap()
             })
-            .collect::<Vec<[i32; LARGE]>>();
+            .collect::<Vec<[f32; LARGE]>>();
         c
     });
     group.bench_function("MatrixDxS std::ops::mul (l)", |bench| {
@@ -464,7 +464,7 @@ fn mul_benchmark(c: &mut Criterion) {
     });
 
     let a = MatrixSxD::try_from({
-        let c: [Vec<i32>; LARGE] = (0..LARGE)
+        let c: [Vec<f32>; LARGE] = (0..LARGE)
             .map(|_| (0..LARGE).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
             .collect::<Vec<_>>()
             .try_into()
@@ -473,7 +473,7 @@ fn mul_benchmark(c: &mut Criterion) {
     })
     .unwrap();
     let b = MatrixSxD::try_from({
-        let c: [Vec<i32>; LARGE] = (0..LARGE)
+        let c: [Vec<f32>; LARGE] = (0..LARGE)
             .map(|_| (0..LARGE).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
             .collect::<Vec<_>>()
             .try_into()
@@ -486,32 +486,32 @@ fn mul_benchmark(c: &mut Criterion) {
     });
 
     // TODO Clean up this construct here and in the other benchmarks.
-    let a = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let a = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
     });
-    let b = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let b = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
@@ -574,7 +574,7 @@ fn _matmul_benchmark(c: &mut Criterion) {
     });
 
     let a = MatrixDxS::<_, LARGE>::from({
-        let c: Vec<[i32; LARGE]> = (0..LARGE)
+        let c: Vec<[f32; LARGE]> = (0..LARGE)
             .map(|_| {
                 (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
@@ -582,11 +582,11 @@ fn _matmul_benchmark(c: &mut Criterion) {
                     .try_into()
                     .unwrap()
             })
-            .collect::<Vec<[i32; LARGE]>>();
+            .collect::<Vec<[f32; LARGE]>>();
         c
     });
     let b = MatrixDxS::<_, LARGE>::from({
-        let c: Vec<[i32; LARGE]> = (0..LARGE)
+        let c: Vec<[f32; LARGE]> = (0..LARGE)
             .map(|_| {
                 (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
@@ -594,7 +594,7 @@ fn _matmul_benchmark(c: &mut Criterion) {
                     .try_into()
                     .unwrap()
             })
-            .collect::<Vec<[i32; LARGE]>>();
+            .collect::<Vec<[f32; LARGE]>>();
         c
     });
     group.bench_function("MatrixDxS matmul (l)", |bench| {
@@ -602,7 +602,7 @@ fn _matmul_benchmark(c: &mut Criterion) {
     });
 
     let a = MatrixSxD::try_from({
-        let c: [Vec<i32>; LARGE] = (0..LARGE)
+        let c: [Vec<f32>; LARGE] = (0..LARGE)
             .map(|_| (0..LARGE).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
             .collect::<Vec<_>>()
             .try_into()
@@ -611,7 +611,7 @@ fn _matmul_benchmark(c: &mut Criterion) {
     })
     .unwrap();
     let b = MatrixSxD::try_from({
-        let c: [Vec<i32>; LARGE] = (0..LARGE)
+        let c: [Vec<f32>; LARGE] = (0..LARGE)
             .map(|_| (0..LARGE).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
             .collect::<Vec<_>>()
             .try_into()
@@ -623,32 +623,32 @@ fn _matmul_benchmark(c: &mut Criterion) {
         bench.iter(|| a.clone().matmul(b.clone()))
     });
 
-    let a = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let a = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
     });
-    let b = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let b = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
@@ -710,7 +710,7 @@ fn sum_benchmark(c: &mut Criterion) {
     });
 
     let a = MatrixDxS::<_, LARGE>::from({
-        let c: Vec<[i32; LARGE]> = (0..LARGE)
+        let c: Vec<[f32; LARGE]> = (0..LARGE)
             .map(|_| {
                 (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
@@ -718,7 +718,7 @@ fn sum_benchmark(c: &mut Criterion) {
                     .try_into()
                     .unwrap()
             })
-            .collect::<Vec<[i32; LARGE]>>();
+            .collect::<Vec<[f32; LARGE]>>();
         c
     });
     group.bench_function("MatrixDxS sum (l)", |bench| bench.iter(|| a.sum()));
@@ -728,7 +728,7 @@ fn sum_benchmark(c: &mut Criterion) {
     });
 
     let a = MatrixSxD::try_from({
-        let c: [Vec<i32>; LARGE] = (0..LARGE)
+        let c: [Vec<f32>; LARGE] = (0..LARGE)
             .map(|_| (0..LARGE).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
             .collect::<Vec<_>>()
             .try_into()
@@ -742,17 +742,17 @@ fn sum_benchmark(c: &mut Criterion) {
         bench.iter(|| a.column_sum())
     });
 
-    let a = MatrixSxS::<i32, LARGE, LARGE>::from({
-        let c: [[i32; LARGE]; LARGE] = (0..LARGE)
+    let a = MatrixSxS::<f32, LARGE, LARGE>::from({
+        let c: [[f32; LARGE]; LARGE] = (0..LARGE)
             .map(|_| {
-                let a: [i32; LARGE] = (0..LARGE)
+                let a: [f32; LARGE] = (0..LARGE)
                     .map(|_| rng.gen_range(RANGE))
                     .collect::<Vec<_>>()
                     .try_into()
                     .unwrap();
                 a
             })
-            .collect::<Vec<[i32; LARGE]>>()
+            .collect::<Vec<[f32; LARGE]>>()
             .try_into()
             .unwrap();
         c
@@ -767,7 +767,7 @@ fn sum_benchmark(c: &mut Criterion) {
 use ndarray_rand::rand_distr::Uniform;
 use ndarray_rand::RandomExt;
 
-fn static_la_rand(rows: usize, columns: usize) -> MatrixDxD<i32> {
+fn static_la_rand(rows: usize, columns: usize) -> MatrixDxD<f32> {
     let mut rng = rand::thread_rng();
     MatrixDxD::try_from(
         (0..rows)
@@ -780,10 +780,10 @@ fn static_la_rand(rows: usize, columns: usize) -> MatrixDxD<i32> {
     )
     .unwrap()
 }
-fn ndarray_rand(rows: usize, columns: usize) -> ndarray::Array2<i32> {
+fn ndarray_rand(rows: usize, columns: usize) -> ndarray::Array2<f32> {
     ndarray::Array::random((rows, columns), Uniform::new(RANGE.start, RANGE.end))
 }
-fn nalgebra_rand(rows: usize, columns: usize) -> nalgebra::DMatrix<i32> {
+fn nalgebra_rand(rows: usize, columns: usize) -> nalgebra::DMatrix<f32> {
     let mut rng = rand::thread_rng();
     nalgebra::base::DMatrix::from_fn(rows, columns, |_, _| rng.gen_range(RANGE))
 }
@@ -842,7 +842,7 @@ fn dynamic_div_comparison(c: &mut Criterion) {
             let y = ndarray_rand(i, i);
             b.iter(|| x.clone() / y.clone())
         });
-        // nalgebra doesn't support Div for i32.
+        // nalgebra doesn't support div here for some reason.
         // group.bench_with_input(BenchmarkId::new("nalgebra", i), &i, |b, &i| {
         //     let x = nalgebra_rand(i,i);
         //     let y = nalgebra_rand(i,i);
@@ -859,7 +859,6 @@ fn dynamic_mul_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Mul");
     group.warm_up_time(std::time::Duration::from_millis(50));
     group.measurement_time(std::time::Duration::from_millis(200));
-    let mut rng = rand::thread_rng();
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
@@ -872,18 +871,8 @@ fn dynamic_mul_comparison(c: &mut Criterion) {
             b.iter(|| x.clone() * y.clone())
         });
         group.bench_with_input(BenchmarkId::new("static-la", i), &i, |b, &i| {
-            let x = MatrixDxD::<i32>::try_from(
-                (0..i)
-                    .map(|_| (0..i).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-            )
-            .unwrap();
-            let y = MatrixDxD::<i32>::try_from(
-                (0..i)
-                    .map(|_| (0..i).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-            )
-            .unwrap();
+            let x = static_la_rand(i, i);
+            let y = static_la_rand(i, i);
             b.iter(|| x.clone() * y.clone())
         });
     }
