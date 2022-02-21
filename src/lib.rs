@@ -116,6 +116,7 @@
 //! assert_eq!(c,MatrixSxD::try_from([vec![1, 2, 3], vec![4, 5, 6]]).unwrap());
 //! ```
 //! ### Arithmetic
+//! Most traits from [`std::ops`] are implemented.
 //! ```ignore
 //! use std::convert::TryFrom;
 //! use static_la::*;
