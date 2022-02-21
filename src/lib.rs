@@ -175,6 +175,8 @@ mod distribution;
 mod sub;
 /// [`std::ops::SubAssign`] Arithmetic subtraction operations.
 mod sub_assign;
+/// Transpose functionality.
+mod transpose;
 /// [`std::convert::TryFrom`] Fallible value-to-value conversions.
 mod try_from;
 
