@@ -179,7 +179,7 @@ mod mul_assign;
 mod partial_eq;
 /// Slicing functionality.
 mod slice;
-pub use slice::{SliceDxD,SliceDxS,SliceSxD,SliceSxS};
+pub use slice::{SliceDxD, SliceDxS, SliceSxD, SliceSxS};
 /// Implementations relating to dimensions of matrices.
 mod dims;
 /// Constructing matrices with random values functionality.
@@ -195,6 +195,8 @@ mod sums;
 /// Transpose functionality.
 mod transpose;
 pub use transpose::*;
+/// [`std::ops::Neg`] Negation operations.
+mod neg;
 /// [`std::convert::TryFrom`] Fallible value-to-value conversions.
 mod try_from;
 
