@@ -3,6 +3,7 @@
 #![feature(array_methods)]
 #![feature(array_chunks)]
 #![feature(adt_const_params)]
+#![feature(doc_cfg)]
 //! An extremely minimal super static type safe implementation of matrix types.
 //!
 //! While [`ndarray`](https://docs.rs/ndarray/latest/ndarray/) offers no compile time type checking
@@ -73,6 +74,9 @@
 //! // │ 5 5 5 │
 //! // │ 5 5 5 │
 //! // └───────┘
+//! ```
+//! *This requires the `distribution` feature*
+//! ```ignore
 //! // From a given shape and with values sampled from a given distribution
 //! use rand::distributions::{Uniform,Standard};
 //! let dxd = MatrixDxD::<i32>::distribution(2,3,Uniform::from(0..10));
@@ -169,6 +173,7 @@ mod partial_eq;
 mod slice;
 pub use slice::*;
 /// Constructing matrices with random values functionality.
+#[doc(cfg(feature = "distribution"))]
 #[cfg(feature = "distribution")]
 mod distribution;
 /// [`std::ops::Sub`] Arithmetic subtraction operations.

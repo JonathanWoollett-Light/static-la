@@ -542,7 +542,7 @@ fn _matmul_benchmark(c: &mut Criterion) {
     group.bench_function("MatrixSxD matmul (s)", |bench| bench.iter(|| a.matmul(&b)));
 
     let a = MatrixSxS::<i32, 2, 3>::from([[1, 3, 5], [2, 4, 6]]);
-    let b = MatrixSxS::<i32, 2, 3>::from([[7, 10], [8, 11], [9, 12]]);
+    let b = MatrixSxS::<i32, 3, 2>::from([[7, 10], [8, 11], [9, 12]]);
     group.bench_function("MatrixSxS matmul (s)", |bench| bench.iter(|| a.matmul(&b)));
 
     // Large
