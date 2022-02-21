@@ -203,6 +203,8 @@ mod bitand_assign;
 mod bitor;
 /// [`std::ops::BitOrAssign`] Bitwise OR assignment operation.
 mod bitor_assign;
+/// [`std::ops::BitXor`] Bitwise XOR operation.
+mod bitxor;
 /// [`std::ops::Neg`] Negation operations.
 mod neg;
 /// [`std::ops::Not`] Bitwise NOT operations.
