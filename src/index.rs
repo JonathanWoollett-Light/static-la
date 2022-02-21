@@ -1,5 +1,5 @@
 use crate::*;
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 
 type Pair = (usize, usize);
 
@@ -13,6 +13,13 @@ impl<T> Index<Pair> for MatrixDxD<T> {
         &self.data[row * self.columns + column]
     }
 }
+impl<T> IndexMut<Pair> for MatrixDxD<T> {
+    fn index_mut<'a>(&'a mut self, (row, column): (usize, usize)) -> &'a mut T {
+        assert!(row < self.rows, "Row out of bounds");
+        assert!(column < self.columns, "Columns out of bounds");
+        &mut self.data[row * self.columns + column]
+    }
+}
 // MatrixDxS
 // --------------------------------------------------
 impl<T, const COLUMNS: usize> Index<Pair> for MatrixDxS<T, COLUMNS> {
@@ -23,6 +30,13 @@ impl<T, const COLUMNS: usize> Index<Pair> for MatrixDxS<T, COLUMNS> {
         &self.data[row * COLUMNS + column]
     }
 }
+impl<T, const COLUMNS: usize> IndexMut<Pair> for MatrixDxS<T, COLUMNS> {
+    fn index_mut<'a>(&'a mut self, (row, column): (usize, usize)) -> &'a mut T {
+        assert!(row < self.rows, "Row out of bounds");
+        assert!(column < COLUMNS, "Columns out of bounds");
+        &mut self.data[row * COLUMNS + column]
+    }
+}
 // MatrixSxD
 // --------------------------------------------------
 impl<T, const ROWS: usize> Index<Pair> for MatrixSxD<T, ROWS> {
@@ -31,6 +45,13 @@ impl<T, const ROWS: usize> Index<Pair> for MatrixSxD<T, ROWS> {
         assert!(row < ROWS, "Row out of bounds");
         assert!(column < self.columns, "Columns out of bounds");
         &self.data[row * self.columns + column]
+    }
+}
+impl<T, const ROWS: usize> IndexMut<Pair> for MatrixSxD<T, ROWS> {
+    fn index_mut<'a>(&'a mut self, (row, column): (usize, usize)) -> &'a mut T {
+        assert!(row < ROWS, "Row out of bounds");
+        assert!(column < self.columns, "Columns out of bounds");
+        &mut self.data[row * self.columns + column]
     }
 }
 // MatrixSxS
@@ -44,6 +65,16 @@ where
         assert!(row < ROWS, "Row out of bounds");
         assert!(column < COLUMNS, "Columns out of bounds");
         &self.data[row * COLUMNS + column]
+    }
+}
+impl<T, const ROWS: usize, const COLUMNS: usize> IndexMut<Pair> for MatrixSxS<T, ROWS, COLUMNS>
+where
+    [(); ROWS * COLUMNS]:,
+{
+    fn index_mut<'a>(&'a mut self, (row, column): (usize, usize)) -> &'a mut T {
+        assert!(row < ROWS, "Row out of bounds");
+        assert!(column < COLUMNS, "Columns out of bounds");
+        &mut self.data[row * COLUMNS + column]
     }
 }
 // Tests
