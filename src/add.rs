@@ -330,10 +330,10 @@ mod tests {
     // --------------------------------------------------
     #[test]
     fn sxs_sxs() {
-        let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
-        let b = MatrixSxS::from([[7, 8, 9], [10, 11, 12]]);
+        let a = MatrixSxS::<i32, 2, 3>::from([[1, 2, 3], [4, 5, 6]]);
+        let b = MatrixSxS::<i32, 2, 3>::from([[7, 8, 9], [10, 11, 12]]);
         let c = a + b;
-        let d = MatrixSxS::from([[8, 10, 12], [14, 16, 18]]);
+        let d = MatrixSxS::<i32, 2, 3>::from([[8, 10, 12], [14, 16, 18]]);
         assert_eq!(c, d);
     }
     #[test]

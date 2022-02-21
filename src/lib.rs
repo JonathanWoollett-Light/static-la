@@ -45,13 +45,33 @@
 //! ```rust
 //! use std::convert::TryFrom;
 //! use static_la::*;
+//! // From shaped arrays/vecs
 //! let dxd = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
 //! let dxs = MatrixDxS::from(vec![[1, 2, 3], [4, 5, 6]]);
 //! let sxd = MatrixSxD::try_from([vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
-//! let sxs = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
+//! let sxs = MatrixSxS::<i32,2,3>::from([[1, 2, 3], [4, 5, 6]]);
+//! // From a given shape and array/vec
+//! let dxd = MatrixDxD::try_from((2,3,vec![1, 2, 3, 4, 5, 6])).unwrap();
+//! let dxs = MatrixDxS::<_,2>::try_from((3,vec![1, 2, 3,4, 5, 6])).unwrap();
+//! let sxd = MatrixSxD::<_,3>::try_from((2,vec![1, 2, 3, 4, 5, 6])).unwrap();
+//! let sxs = MatrixSxS::<_,2,3>::from([1, 2, 3, 4, 5, 6]);
+//! // From a given shape and slice
+//! let dxd = MatrixDxD::try_from((2,3,&[1, 2, 3, 4, 5, 6])).unwrap();
+//! let dxs = MatrixDxS::<_,2>::try_from((3,&[1, 2, 3,4, 5, 6])).unwrap();
+//! let sxd = MatrixSxD::<_,3>::try_from((2,&[1, 2, 3, 4, 5, 6])).unwrap();
+//! let sxs = MatrixSxS::<_,2,3>::from(&[1, 2, 3, 4, 5, 6]);
 //! // ┌───────┐
 //! // │ 1 2 3 │
 //! // │ 4 5 6 │
+//! // └───────┘
+//! // From a given shape and value
+//! let dxd = MatrixDxD::from((2,3,5));
+//! let dxs = MatrixDxS::<_,3>::from((2,5));
+//! let sxd = MatrixSxD::<_,2>::from((3,5));
+//! let sxs = MatrixSxS::<_,2,3>::from(5);
+//! // ┌───────┐
+//! // │ 5 5 5 │
+//! // │ 5 5 5 │
 //! // └───────┘
 //! ```
 //! ### Indexing
@@ -317,7 +337,7 @@ where
 }
 /// A `static x static` matrix where both dimensions are known at compile time.
 /// ```
-/// let _ = static_la::MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
+/// let _ = static_la::MatrixSxS::<i32,2,3>::from([[1, 2, 3], [4, 5, 6]]);
 /// ```
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub struct MatrixSxS<T, const ROWS: usize, const COLUMNS: usize>

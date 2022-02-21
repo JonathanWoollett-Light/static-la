@@ -405,10 +405,10 @@ mod tests {
     // --------------------------------------------------
     #[test]
     fn sxs_sxs() {
-        let a = MatrixSxS::from([[1, 3, 5], [2, 4, 6]]);
-        let b = MatrixSxS::from([[7, 10], [8, 11], [9, 12]]);
+        let a = MatrixSxS::<i32, 2, 3>::from([[1, 3, 5], [2, 4, 6]]);
+        let b = MatrixSxS::<i32, 3, 2>::from([[7, 10], [8, 11], [9, 12]]);
         let c = a.matmul(&b);
-        let d = MatrixSxS::from([[76, 103], [100, 136]]);
+        let d = MatrixSxS::<i32, 2, 2>::from([[76, 103], [100, 136]]);
         assert_eq!(c, d);
     }
     #[test]

@@ -91,7 +91,7 @@ mod tests {
     // --------------------------------------------------
     #[test]
     fn sxs() {
-        let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
+        let a = MatrixSxS::<i32, 2, 3>::from([[1, 2, 3], [4, 5, 6]]);
         assert_eq!(a[(0, 0)], 1);
         assert_eq!(a[(0, 1)], 2);
         assert_eq!(a[(0, 2)], 3);

@@ -36,6 +36,20 @@ impl<T> TryFrom<(usize, usize, Vec<T>)> for MatrixDxD<T> {
         }
     }
 }
+impl<T: Clone> TryFrom<(usize, usize, &[T])> for MatrixDxD<T> {
+    type Error = &'static str;
+    fn try_from((rows, columns, data): (usize, usize, &[T])) -> Result<Self, Self::Error> {
+        if rows * columns == data.len() {
+            Ok(Self {
+                data: Vec::from(data),
+                rows,
+                columns,
+            })
+        } else {
+            Err("Inside `Vec`s differ in length.")
+        }
+    }
+}
 // MatrixSxD
 // --------------------------------------------------
 impl<T: Clone, const ROWS: usize> TryFrom<[Vec<T>; ROWS]> for MatrixSxD<T, ROWS> {
@@ -68,6 +82,19 @@ impl<T, const ROWS: usize> TryFrom<(usize, Vec<T>)> for MatrixSxD<T, ROWS> {
         }
     }
 }
+impl<T: Clone, const ROWS: usize> TryFrom<(usize, &[T])> for MatrixSxD<T, ROWS> {
+    type Error = &'static str;
+    fn try_from((columns, data): (usize, &[T])) -> Result<Self, Self::Error> {
+        if ROWS * columns == data.len() {
+            Ok(Self {
+                data: Vec::from(data),
+                columns,
+            })
+        } else {
+            Err("Inside `Vec`s differ in length.")
+        }
+    }
+}
 // MatrixDxS
 // --------------------------------------------------
 impl<T, const COLUMNS: usize> TryFrom<(usize, Vec<T>)> for MatrixDxS<T, COLUMNS> {
@@ -75,6 +102,19 @@ impl<T, const COLUMNS: usize> TryFrom<(usize, Vec<T>)> for MatrixDxS<T, COLUMNS>
     fn try_from((rows, data): (usize, Vec<T>)) -> Result<Self, Self::Error> {
         if COLUMNS * rows == data.len() {
             Ok(Self { data: data, rows })
+        } else {
+            Err("Inside `Vec`s differ in length.")
+        }
+    }
+}
+impl<T: Clone, const COLUMNS: usize> TryFrom<(usize, &[T])> for MatrixDxS<T, COLUMNS> {
+    type Error = &'static str;
+    fn try_from((rows, data): (usize, &[T])) -> Result<Self, Self::Error> {
+        if COLUMNS * rows == data.len() {
+            Ok(Self {
+                data: Vec::from(data),
+                rows,
+            })
         } else {
             Err("Inside `Vec`s differ in length.")
         }
