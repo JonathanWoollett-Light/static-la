@@ -205,6 +205,8 @@ mod bitor;
 mod bitor_assign;
 /// [`std::ops::Neg`] Negation operations.
 mod neg;
+/// [`std::ops::Not`] Bitwise NOT operations.
+mod not;
 /// [`std::ops::Rem`] Remainder functionality.
 mod rem;
 /// [`std::ops::RemAssign`] Remainder assign functionality.
