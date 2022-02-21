@@ -197,6 +197,8 @@ mod transpose;
 pub use transpose::*;
 /// [`std::ops::Neg`] Negation operations.
 mod neg;
+/// [`std::ops::Rem`] Remainder functionality.
+mod rem;
 /// [`std::convert::TryFrom`] Fallible value-to-value conversions.
 mod try_from;
 
