@@ -521,7 +521,8 @@ fn mul_benchmark(c: &mut Criterion) {
     });
 }
 
-fn matmul_benchmark(c: &mut Criterion) {
+// This causes compilers error.
+fn _matmul_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("matrix multiplication");
     // group.warm_up_time(std::time::Duration::from_millis(100));
     // group.measurement_time(std::time::Duration::from_millis(500));
@@ -766,35 +767,45 @@ fn sum_benchmark(c: &mut Criterion) {
 use ndarray_rand::rand_distr::Uniform;
 use ndarray_rand::RandomExt;
 
+fn static_la_rand(rows: usize, columns: usize) -> MatrixDxD<i32> {
+    let mut rng = rand::thread_rng();
+    MatrixDxD::try_from(
+        (0..rows)
+            .map(|_| {
+                (0..columns)
+                    .map(|_| rng.gen_range(RANGE))
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>(),
+    )
+    .unwrap()
+}
+fn ndarray_rand(rows: usize, columns: usize) -> ndarray::Array2<i32> {
+    ndarray::Array::random((rows, columns), Uniform::new(RANGE.start, RANGE.end))
+}
+fn nalgebra_rand(rows: usize, columns: usize) -> nalgebra::DMatrix<i32> {
+    let mut rng = rand::thread_rng();
+    nalgebra::base::DMatrix::from_fn(rows, columns, |_, _| rng.gen_range(RANGE))
+}
+
 fn dynamic_add_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Add");
     group.warm_up_time(std::time::Duration::from_millis(50));
     group.measurement_time(std::time::Duration::from_millis(200));
-    let mut rng = rand::thread_rng();
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
-            let x = ndarray::Array::random((i, i), Uniform::new(RANGE.start, RANGE.end));
-            let y = ndarray::Array::random((i, i), Uniform::new(RANGE.start, RANGE.end));
+            let x = ndarray_rand(i, i);
+            let y = ndarray_rand(i, i);
             b.iter(|| x.clone() + y.clone())
         });
         group.bench_with_input(BenchmarkId::new("nalgebra", i), &i, |b, &i| {
-            let x = nalgebra::base::DMatrix::from_fn(i, i, |_, _| rng.gen_range(RANGE));
-            let y = nalgebra::base::DMatrix::from_fn(i, i, |_, _| rng.gen_range(RANGE));
+            let x = nalgebra_rand(i, i);
+            let y = nalgebra_rand(i, i);
             b.iter(|| x.clone() + y.clone())
         });
         group.bench_with_input(BenchmarkId::new("static-la", i), &i, |b, &i| {
-            let x = MatrixDxD::<i32>::try_from(
-                (0..i)
-                    .map(|_| (0..i).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-            )
-            .unwrap();
-            let y = MatrixDxD::<i32>::try_from(
-                (0..i)
-                    .map(|_| (0..i).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-            )
-            .unwrap();
+            let x = static_la_rand(i, i);
+            let y = static_la_rand(i, i);
             b.iter(|| x.clone() + y.clone())
         });
     }
@@ -803,31 +814,20 @@ fn dynamic_sub_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Sub");
     group.warm_up_time(std::time::Duration::from_millis(50));
     group.measurement_time(std::time::Duration::from_millis(200));
-    let mut rng = rand::thread_rng();
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
-            let x = ndarray::Array::random((i, i), Uniform::new(RANGE.start, RANGE.end));
-            let y = ndarray::Array::random((i, i), Uniform::new(RANGE.start, RANGE.end));
+            let x = ndarray_rand(i, i);
+            let y = ndarray_rand(i, i);
             b.iter(|| x.clone() - y.clone())
         });
         group.bench_with_input(BenchmarkId::new("nalgebra", i), &i, |b, &i| {
-            let x = nalgebra::base::DMatrix::from_fn(i, i, |_, _| rng.gen_range(RANGE));
-            let y = nalgebra::base::DMatrix::from_fn(i, i, |_, _| rng.gen_range(RANGE));
+            let x = nalgebra_rand(i, i);
+            let y = nalgebra_rand(i, i);
             b.iter(|| x.clone() - y.clone())
         });
         group.bench_with_input(BenchmarkId::new("static-la", i), &i, |b, &i| {
-            let x = MatrixDxD::<i32>::try_from(
-                (0..i)
-                    .map(|_| (0..i).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-            )
-            .unwrap();
-            let y = MatrixDxD::<i32>::try_from(
-                (0..i)
-                    .map(|_| (0..i).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-            )
-            .unwrap();
+            let x = static_la_rand(i, i);
+            let y = static_la_rand(i, i);
             b.iter(|| x.clone() - y.clone())
         });
     }
@@ -836,31 +836,21 @@ fn dynamic_div_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Div");
     group.warm_up_time(std::time::Duration::from_millis(50));
     group.measurement_time(std::time::Duration::from_millis(200));
-    let mut rng = rand::thread_rng();
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
-            let x = ndarray::Array::random((i, i), Uniform::new(RANGE.start, RANGE.end));
-            let y = ndarray::Array::random((i, i), Uniform::new(RANGE.start, RANGE.end));
+            let x = ndarray_rand(i, i);
+            let y = ndarray_rand(i, i);
             b.iter(|| x.clone() / y.clone())
         });
+        // nalgebra doesn't support Div for i32.
         // group.bench_with_input(BenchmarkId::new("nalgebra", i), &i, |b, &i| {
-        //     let x = nalgebra::base::DMatrix::from_fn(i, i, |_, _| rng.gen_range(RANGE));
-        //     let y = nalgebra::base::DMatrix::from_fn(i, i, |_, _| rng.gen_range(RANGE));
+        //     let x = nalgebra_rand(i,i);
+        //     let y = nalgebra_rand(i,i);
         //     b.iter(|| x.clone() / y.clone())
         // });
         group.bench_with_input(BenchmarkId::new("static-la", i), &i, |b, &i| {
-            let x = MatrixDxD::<i32>::try_from(
-                (0..i)
-                    .map(|_| (0..i).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-            )
-            .unwrap();
-            let y = MatrixDxD::<i32>::try_from(
-                (0..i)
-                    .map(|_| (0..i).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
-                    .collect::<Vec<_>>(),
-            )
-            .unwrap();
+            let x = static_la_rand(i, i);
+            let y = static_la_rand(i, i);
             b.iter(|| x.clone() / y.clone())
         });
     }
@@ -872,13 +862,13 @@ fn dynamic_mul_comparison(c: &mut Criterion) {
     let mut rng = rand::thread_rng();
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
-            let x = ndarray::Array::random((i, i), Uniform::new(RANGE.start, RANGE.end));
-            let y = ndarray::Array::random((i, i), Uniform::new(RANGE.start, RANGE.end));
+            let x = ndarray_rand(i, i);
+            let y = ndarray_rand(i, i);
             b.iter(|| x.clone() * y.clone())
         });
         group.bench_with_input(BenchmarkId::new("nalgebra", i), &i, |b, &i| {
-            let x = nalgebra::base::DMatrix::from_fn(i, i, |_, _| rng.gen_range(RANGE));
-            let y = nalgebra::base::DMatrix::from_fn(i, i, |_, _| rng.gen_range(RANGE));
+            let x = nalgebra_rand(i, i);
+            let y = nalgebra_rand(i, i);
             b.iter(|| x.clone() * y.clone())
         });
         group.bench_with_input(BenchmarkId::new("static-la", i), &i, |b, &i| {
