@@ -73,6 +73,12 @@
 //! // │ 5 5 5 │
 //! // │ 5 5 5 │
 //! // └───────┘
+//! // From a given shape and with values sampled from a given distribution
+//! use rand::distributions::{Uniform,Standard};
+//! let dxd = MatrixDxD::<i32>::distribution(2,3,Uniform::from(0..10));
+//! let dxs = MatrixDxS::<f32,3>::distribution(2,Standard);
+//! let sxd = MatrixSxD::<f32,2>::distribution(3,Standard);
+//! let sxs = MatrixSxS::<f32,2,3>::distribution(Standard);
 //! ```
 //! ### Indexing
 //! ```
@@ -162,12 +168,17 @@ mod partial_eq;
 /// Slicing functionality.
 mod slice;
 pub use slice::*;
+/// Constructing matrices with random values functionality.
+#[cfg(feature = "distribution")]
+mod distribution;
 /// [`std::ops::Sub`] Arithmetic subtraction operations.
 mod sub;
 /// [`std::ops::SubAssign`] Arithmetic subtraction operations.
 mod sub_assign;
 /// [`std::convert::TryFrom`] Fallible value-to-value conversions.
 mod try_from;
+
+use std::convert::TryFrom;
 
 // Matrix types
 // --------------------------------------------------
@@ -303,7 +314,7 @@ impl<T, const ROWS: usize> MatrixSxD<T, ROWS> {
         self.columns
     }
 }
-use std::convert::TryFrom;
+
 impl<T: std::iter::Sum<T> + Copy + Default + std::fmt::Debug, const ROWS: usize> MatrixSxD<T, ROWS>
 where
     [(); ROWS * 1]:,

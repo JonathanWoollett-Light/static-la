@@ -31,8 +31,8 @@ fn add_benchmark(c: &mut Criterion) {
         bench.iter(|| a.clone() + b.clone())
     });
 
-    let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
-    let b = MatrixSxS::from([[7, 8, 9], [10, 11, 12]]);
+    let a = MatrixSxS::<i32, 2, 3>::from([[1, 2, 3], [4, 5, 6]]);
+    let b = MatrixSxS::<i32, 2, 3>::from([[7, 8, 9], [10, 11, 12]]);
     group.bench_function("MatrixSxS std::ops::add (s)", |bench| {
         bench.iter(|| a.clone() + b.clone())
     });
@@ -157,8 +157,8 @@ fn sub_benchmark(c: &mut Criterion) {
         bench.iter(|| a.clone() - b.clone())
     });
 
-    let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
-    let b = MatrixSxS::from([[7, 8, 9], [10, 11, 12]]);
+    let a = MatrixSxS::<i32, 2, 3>::from([[1, 2, 3], [4, 5, 6]]);
+    let b = MatrixSxS::<i32, 2, 3>::from([[7, 8, 9], [10, 11, 12]]);
     group.bench_function("MatrixSxS std::ops::sub (s)", |bench| {
         bench.iter(|| a.clone() - b.clone())
     });
@@ -283,8 +283,8 @@ fn div_benchmark(c: &mut Criterion) {
         bench.iter(|| a.clone() / b.clone())
     });
 
-    let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
-    let b = MatrixSxS::from([[7, 8, 9], [10, 11, 12]]);
+    let a = MatrixSxS::<i32, 2, 3>::from([[1, 2, 3], [4, 5, 6]]);
+    let b = MatrixSxS::<i32, 2, 3>::from([[7, 8, 9], [10, 11, 12]]);
     group.bench_function("MatrixSxS std::ops::div (s)", |bench| {
         bench.iter(|| a.clone() / b.clone())
     });
@@ -409,8 +409,8 @@ fn mul_benchmark(c: &mut Criterion) {
         bench.iter(|| a.clone() * b.clone())
     });
 
-    let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
-    let b = MatrixSxS::from([[7, 8, 9], [10, 11, 12]]);
+    let a = MatrixSxS::<i32, 2, 3>::from([[1, 2, 3], [4, 5, 6]]);
+    let b = MatrixSxS::<i32, 2, 3>::from([[7, 8, 9], [10, 11, 12]]);
     group.bench_function("MatrixSxS std::ops::mul (s)", |bench| {
         bench.iter(|| a.clone() * b.clone())
     });
@@ -541,8 +541,8 @@ fn _matmul_benchmark(c: &mut Criterion) {
     let b = MatrixSxD::try_from([vec![7, 10], vec![8, 11], vec![9, 12]]).unwrap();
     group.bench_function("MatrixSxD matmul (s)", |bench| bench.iter(|| a.matmul(&b)));
 
-    let a = MatrixSxS::from([[1, 3, 5], [2, 4, 6]]);
-    let b = MatrixSxS::from([[7, 10], [8, 11], [9, 12]]);
+    let a = MatrixSxS::<i32, 2, 3>::from([[1, 3, 5], [2, 4, 6]]);
+    let b = MatrixSxS::<i32, 2, 3>::from([[7, 10], [8, 11], [9, 12]]);
     group.bench_function("MatrixSxS matmul (s)", |bench| bench.iter(|| a.matmul(&b)));
 
     // Large
@@ -670,7 +670,7 @@ fn sum_benchmark(c: &mut Criterion) {
         bench.iter(|| a.column_sum())
     });
 
-    let a = MatrixSxS::from([[1, 3, 5], [2, 4, 6]]);
+    let a = MatrixSxS::<i32, 2, 3>::from([[1, 3, 5], [2, 4, 6]]);
     group.bench_function("MatrixSxS sum (s)", |bench| bench.iter(|| a.sum()));
     group.bench_function("MatrixSxS row_sum (s)", |bench| bench.iter(|| a.row_sum()));
     group.bench_function("MatrixSxS column_sum (s)", |bench| {
