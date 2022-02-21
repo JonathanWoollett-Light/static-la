@@ -75,7 +75,7 @@
 //! // │ 5 5 5 │
 //! // └───────┘
 //! ```
-//! *This requires the `distribution` feature*
+//! *This requires the `distribution` feature.*
 //! ```ignore
 //! // From a given shape and with values sampled from a given distribution
 //! use rand::distributions::{Uniform,Standard};
