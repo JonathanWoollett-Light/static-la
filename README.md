@@ -41,14 +41,26 @@ In this example the only operations which cannot be fully checked at compile tim
 
 ### Comparisons
 
-The numerical type used is `f32`.
+In the comparison benchmarks we are using `static_la::MatrixDxD<f32>`, `ndarray::Array2<f32>` and `naglebra::DMatrix<f32>`.
 
 We use specialization to call optimized BLAS functions for floating point types, this means this library will typically outperform standard ndarray and nalgebra with `f32` and `f64` operations but may underperformed with integer (`u32`,`i32`, etc.) operations.
 
 The x axis refers to the size of the matrices e.g. 50 refers to 50x50 matrices.
 
-<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/add.svg" width="700">
-<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/sub.svg" width="700">
-<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/mul.svg" width="700">
-<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/div.svg" width="700">
-<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/matmul.svg" width="700">
+
+<table>
+ <tr>
+  <td><img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/add.svg"></td>
+  <td><img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/sub.svg"></td>
+ </tr>
+ <tr></tr>
+ <tr>
+  <td><img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/mul.svg"></td>
+  <td><img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/div.svg"></td>
+ </tr>
+ <tr></tr>
+ <tr>
+  <td><img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/matmul.svg"></td>
+  <td></td>
+ </tr>
+</table>
