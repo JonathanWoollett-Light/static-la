@@ -26,6 +26,7 @@ pub trait InternalMatmul: Sized {
         k: usize,
     );
 }
+/// Default matrix multiplication implementation.
 impl<T: Debug + Mul<Output = T> + AddAssign + Copy + Debug> InternalMatmul for T {
     default fn matmul(a: &[T], b: &[T], c: &mut [T], m: usize, n: usize, k: usize) {
         debug_assert_eq!(a.len(), m * k);
@@ -46,6 +47,7 @@ impl<T: Debug + Mul<Output = T> + AddAssign + Copy + Debug> InternalMatmul for T
         }
     }
 }
+/// `f32` matrix multiplication specialization.
 impl InternalMatmul for f32 {
     fn matmul(a: &[f32], b: &[f32], c: &mut [f32], m: usize, n: usize, k: usize) {
         assert_eq!(a.len(), m * k);
@@ -72,6 +74,7 @@ impl InternalMatmul for f32 {
         }
     }
 }
+/// `f64` matrix multiplication specialization.
 impl InternalMatmul for f64 {
     fn matmul(a: &[f64], b: &[f64], c: &mut [f64], m: usize, n: usize, k: usize) {
         assert_eq!(a.len(), m * k);

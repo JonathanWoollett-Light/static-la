@@ -136,6 +136,7 @@
 //! assert_eq!(a.slice_dxs::<{ 0..2 }>(0..1), MatrixDxS::from(vec![[&1, &2]]));
 //! assert_eq!(a.slice_sxd::<{ 0..1 }>(0..2), MatrixSxD::try_from([vec![&1, &2]]).unwrap());
 //! assert_eq!(a.slice_sxs::<{ 0..1 }, { 0..2 }>(), MatrixSxS::from([[&1, &2]]));
+//! assert_eq!(a.slice_sxs::<{ 0..1 }, { 0..2 }>(), MatrixDxD::try_from(vec![vec![&1, &2]]).unwrap());
 //! ```
 //! ### Transpose
 //! ```
@@ -365,6 +366,10 @@ mod tests {
         assert_eq!(
             a.slice_sxs::<{ 0..1 }, { 0..2 }>(),
             MatrixSxS::from([[&1, &2]])
+        );
+        assert_eq!(
+            a.slice_sxs::<{ 0..1 }, { 0..2 }>(),
+            MatrixDxD::try_from(vec![vec![&1, &2]]).unwrap()
         );
     }
 }
