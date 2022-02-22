@@ -45,6 +45,8 @@ We use specialization to call optimized BLAS functions for floating point types,
 
 The x axis refers to the size of the matrices e.g. 50 refers to 50x50 matrices.
 
+<img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/matmul.svg">
+
 <table>
  <tr>
   <td><img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/add.svg"></td>
@@ -55,9 +57,5 @@ The x axis refers to the size of the matrices e.g. 50 refers to 50x50 matrices.
   <td><img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/mul.svg"></td>
   <td><img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/div.svg"></td>
  </tr>
- <tr></tr>
- <tr>
-  <td><img src="https://github.com/JonathanWoollett-Light/static-la/blob/master/matmul.svg"></td>
-  <td></td>
  </tr>
 </table>
