@@ -85,13 +85,3 @@ impl<T: fmt::Display, const COLUMNS: usize> fmt::Display for MatrixDxS<T, COLUMN
         write!(f, "\n{}{}{}", top,middle,bottom)
     }
 }
-
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn print_test() {
-        let a = crate::MatrixSxS::<i32,2,3>::from([[1,2,3],[4,5,6]]);
-        println!("a: {}",a);
-    }
-}
