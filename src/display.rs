@@ -19,7 +19,7 @@ where
                 width = std::cmp::max(t.chars().count(),width);
                 t
             }).collect::<String>();
-        let bar = "─".repeat(width-3);
+        let bar = " ".repeat(width-3);
         let top = format!("┌{}┐\n",bar);
         let bottom = format!("└{}┘",bar);
         write!(f, "\n{}{}{}", top,middle,bottom)
@@ -39,7 +39,7 @@ impl<T: fmt::Display> fmt::Display for MatrixDxD<T> {
                 width = std::cmp::max(t.chars().count(),width);
                 t
             }).collect::<String>();
-        let bar = "─".repeat(width-3);
+        let bar = " ".repeat(width-3);
         let top = format!("┌{}┐\n",bar);
         let bottom = format!("└{}┘",bar);
         write!(f, "\n{}{}{}", top,middle,bottom)
@@ -49,7 +49,7 @@ impl<T: fmt::Display, const ROWS: usize> fmt::Display for MatrixSxD<T, ROWS> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut width = Default::default();
         let middle = self.data
-            .chunks_exact(self.columns)
+        .chunks_exact(self.columns)
             .map(|r|{
                 let t = format!("│ {}│\n",
                     r.iter()
@@ -59,7 +59,7 @@ impl<T: fmt::Display, const ROWS: usize> fmt::Display for MatrixSxD<T, ROWS> {
                 width = std::cmp::max(t.chars().count(),width);
                 t
             }).collect::<String>();
-        let bar = "─".repeat(width-3);
+        let bar = " ".repeat(width-3);
         let top = format!("┌{}┐\n",bar);
         let bottom = format!("└{}┘",bar);
         write!(f, "\n{}{}{}", top,middle,bottom)
@@ -79,9 +79,19 @@ impl<T: fmt::Display, const COLUMNS: usize> fmt::Display for MatrixDxS<T, COLUMN
                 width = std::cmp::max(t.chars().count(),width);
                 t
             }).collect::<String>();
-        let bar = "─".repeat(width-3);
+        let bar = " ".repeat(width-3);
         let top = format!("┌{}┐\n",bar);
         let bottom = format!("└{}┘",bar);
         write!(f, "\n{}{}{}", top,middle,bottom)
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn print_test() {
+        let a = crate::MatrixSxS::<i32,2,3>::from([[1,2,3],[4,5,6]]);
+        println!("a: {}",a);
     }
 }
