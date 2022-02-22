@@ -167,12 +167,12 @@ pub use add_rows::AddRows;
 /// Functionality to expand matrices.
 mod add_columns;
 pub use add_columns::AddColumns;
+/// [`std::fmt::Display`] Format implementations.
+mod display;
 /// [`std::ops::Div`] Arithmetic division operations.
 mod div;
 /// [`std::ops::DivAssign`] Arithmetic division operations.
 mod div_assign;
-/// [`std::fmt::Display`] Format implementations.
-mod display;
 /// [`std::convert::From`] Value-to-value conversions.
 mod from;
 /// [`std::ops::Index`] Indexing operations.
