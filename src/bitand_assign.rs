@@ -1,6 +1,40 @@
 use crate::*;
 use std::ops::BitAndAssign;
 
+// T
+// --------------------------------------------------
+impl<T: BitAndAssign + Copy> BitAndAssign<T> for MatrixDxD<T> {
+    fn bitand_assign(&mut self, x: T) {
+        for a in self.data.iter_mut() {
+            *a &= x;
+        }
+    }
+}
+impl<T: BitAndAssign + Copy, const COLUMNS: usize> BitAndAssign<T> for MatrixDxS<T, COLUMNS> {
+    fn bitand_assign(&mut self, x: T) {
+        for a in self.data.iter_mut() {
+            *a &= x;
+        }
+    }
+}
+impl<T: BitAndAssign + Copy, const ROWS: usize> BitAndAssign<T> for MatrixSxD<T, ROWS> {
+    fn bitand_assign(&mut self, x: T) {
+        for a in self.data.iter_mut() {
+            *a &= x;
+        }
+    }
+}
+impl<T: BitAndAssign + Copy, const ROWS: usize, const COLUMNS: usize> BitAndAssign<T>
+    for MatrixSxS<T, ROWS, COLUMNS>
+where
+    [(); ROWS * COLUMNS]:,
+{
+    fn bitand_assign(&mut self, x: T) {
+        for a in self.data.iter_mut() {
+            *a &= x;
+        }
+    }
+}
 // MatrixDxD
 // --------------------------------------------------
 impl<T: BitAndAssign + Copy> BitAndAssign<MatrixDxD<T>> for MatrixDxD<T> {
@@ -203,6 +237,46 @@ where
 mod tests {
     use crate::*;
     use std::convert::TryFrom;
+    // T
+    // --------------------------------------------------
+    #[test]
+    fn t_dxd() {
+        let mut a =
+            MatrixDxD::try_from(vec![vec![false, true, false], vec![true, false, true]]).unwrap();
+        a &= true;
+        assert_eq!(
+            a,
+            MatrixDxD::try_from(vec![vec![false, true, false], vec![true, false, true]]).unwrap()
+        );
+    }
+    #[test]
+    fn t_dxs() {
+        let mut a = MatrixDxS::from(vec![[false, true, false], [true, false, true]]);
+        a &= true;
+        assert_eq!(
+            a,
+            MatrixDxS::from(vec![[false, true, false], [true, false, true]])
+        );
+    }
+    #[test]
+    fn t_sxd() {
+        let mut a =
+            MatrixSxD::try_from([vec![false, true, false], vec![true, false, true]]).unwrap();
+        a &= true;
+        assert_eq!(
+            a,
+            MatrixSxD::try_from([vec![false, true, false], vec![true, false, true]]).unwrap()
+        );
+    }
+    #[test]
+    fn t_sxs() {
+        let mut a = MatrixSxS::<bool, 2, 3>::from([[false, true, false], [true, false, true]]);
+        a &= true;
+        assert_eq!(
+            a,
+            MatrixSxS::<bool, 2, 3>::from([[false, true, false], [true, false, true]])
+        );
+    }
     // MatrixDxD
     // --------------------------------------------------
     #[test]

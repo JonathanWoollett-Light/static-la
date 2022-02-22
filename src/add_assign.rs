@@ -1,6 +1,40 @@
 use crate::*;
 use std::ops::AddAssign;
 
+// T
+// --------------------------------------------------
+impl<T: AddAssign + Copy> AddAssign<T> for MatrixDxD<T> {
+    fn add_assign(&mut self, x: T) {
+        for a in self.data.iter_mut() {
+            *a += x;
+        }
+    }
+}
+impl<T: AddAssign + Copy, const COLUMNS: usize> AddAssign<T> for MatrixDxS<T, COLUMNS> {
+    fn add_assign(&mut self, x: T) {
+        for a in self.data.iter_mut() {
+            *a += x;
+        }
+    }
+}
+impl<T: AddAssign + Copy, const ROWS: usize> AddAssign<T> for MatrixSxD<T, ROWS> {
+    fn add_assign(&mut self, x: T) {
+        for a in self.data.iter_mut() {
+            *a += x;
+        }
+    }
+}
+impl<T: AddAssign + Copy, const ROWS: usize, const COLUMNS: usize> AddAssign<T>
+    for MatrixSxS<T, ROWS, COLUMNS>
+where
+    [(); ROWS * COLUMNS]:,
+{
+    fn add_assign(&mut self, x: T) {
+        for a in self.data.iter_mut() {
+            *a += x;
+        }
+    }
+}
 // MatrixDxD
 // --------------------------------------------------
 impl<T: AddAssign + Copy> AddAssign<MatrixDxD<T>> for MatrixDxD<T> {
@@ -197,6 +231,38 @@ where
 mod tests {
     use crate::*;
     use std::convert::TryFrom;
+    // T
+    // --------------------------------------------------
+    #[test]
+    fn t_dxd() {
+        let mut a = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
+        a += 3;
+        assert_eq!(
+            a,
+            MatrixDxD::try_from(vec![vec![4, 5, 6], vec![7, 8, 9]]).unwrap()
+        );
+    }
+    #[test]
+    fn t_dxs() {
+        let mut a = MatrixDxS::from(vec![[1, 2, 3], [4, 5, 6]]);
+        a += 3;
+        assert_eq!(a, MatrixDxS::from(vec![[4, 5, 6], [7, 8, 9]]));
+    }
+    #[test]
+    fn t_sxd() {
+        let mut a = MatrixSxD::try_from([vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
+        a += 3;
+        assert_eq!(
+            a,
+            MatrixSxD::try_from([vec![4, 5, 6], vec![7, 8, 9]]).unwrap()
+        );
+    }
+    #[test]
+    fn t_sxs() {
+        let mut a = MatrixSxS::<i32, 2, 3>::from([[1, 2, 3], [4, 5, 6]]);
+        a += 3;
+        assert_eq!(a, MatrixSxS::<i32, 2, 3>::from([[4, 5, 6], [7, 8, 9]]));
+    }
     // MatrixDxD
     // --------------------------------------------------
     #[test]

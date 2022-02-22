@@ -118,17 +118,14 @@
 //! assert_eq!(c,MatrixSxD::try_from([vec![1, 2, 3], vec![4, 5, 6]]).unwrap());
 //! ```
 //! ### Arithmetic
-//! Most traits from [`std::ops`] are implemented.
+//! Most traits from [`std::ops`] are implemented for both matrix and scalar types.
 //! ```ignore
-//! use std::convert::TryFrom;
-//! use static_la::*;
-//! let a = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
-//! let mut b = a + MatrixDxS::from(vec![[7, 8, 9], [10, 11, 12]]);
-//! assert_eq!(b, MatrixDxS::from(vec![[8, 10, 12], [14, 16, 18]]));
-//! b -= MatrixDxS::from(vec![[3, 6, 9], [12, 15, 18]]);
-//! assert_eq!(b, MatrixDxS::from(vec![[5, 4, 3], [2, 1, 0]]));
-//! let c = b * MatrixSxS::from([[2, 2, 2], [3, 3, 3]]);
-//! assert_eq!(c, MatrixSxS::from([[10, 8, 6], [6, 3, 0]]));
+//! use static_la::MatrixSxS;
+//! let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
+//! let b = a + 7;
+//! let mut c = b + MatrixSxS::from([[10, 20, 30], [40, 50, 60]]);
+//! c += 3;
+//! c += MatrixSxS::from([[10, 20, 30], [40, 50, 60]]);
 //! ```
 //! ### Slicing
 //! ```ignore
@@ -344,13 +341,11 @@ mod tests {
     }
     #[test]
     fn rustdoc3() {
-        let a = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
-        let mut b = a + MatrixDxS::from(vec![[7, 8, 9], [10, 11, 12]]);
-        assert_eq!(b, MatrixDxS::from(vec![[8, 10, 12], [14, 16, 18]]));
-        b -= MatrixDxS::from(vec![[3, 6, 9], [12, 15, 18]]);
-        assert_eq!(b, MatrixDxS::from(vec![[5, 4, 3], [2, 1, 0]]));
-        let c = b * MatrixSxS::from([[2, 2, 2], [3, 3, 3]]);
-        assert_eq!(c, MatrixSxS::from([[10, 8, 6], [6, 3, 0]]));
+        let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
+        let b = a + 7;
+        let mut c = b + MatrixSxS::from([[10, 20, 30], [40, 50, 60]]);
+        c += 3;
+        c += MatrixSxS::from([[10, 20, 30], [40, 50, 60]]);
     }
     #[test]
     fn rustdoc4() {
