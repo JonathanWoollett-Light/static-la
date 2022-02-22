@@ -16,8 +16,6 @@ When performing the addition of a `MatrixDxS` (a matrix with a known number of c
  now both the number of rows and columns are known at compile time. This then allows this
  infomation to propagate through your program providing excellent compile time checking.
 
-That being said... I made this in a weekend and there is a tiny amount of functionality.
-
 An example of how types will propagate through a program:
 ```rust
 use static_la::*;
@@ -46,7 +44,6 @@ In the comparison benchmarks we are using `static_la::MatrixDxD<f32>`, `ndarray:
 We use specialization to call optimized BLAS functions for floating point types, this means this library will typically outperform standard ndarray and nalgebra with `f32` and `f64` operations but may underperformed with integer (`u32`,`i32`, etc.) operations.
 
 The x axis refers to the size of the matrices e.g. 50 refers to 50x50 matrices.
-
 
 <table>
  <tr>
