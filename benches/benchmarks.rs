@@ -891,19 +891,19 @@ fn dynamic_matmul_comparison(c: &mut Criterion) {
 //     });
 // }
 // criterion_group!(benches,simple_matmul_benchmark);
-// criterion_group!(benches, dynamic_matmul_comparison);
-criterion_group!(
-    benches,
-    add_benchmark,
-    sub_benchmark,
-    div_benchmark,
-    mul_benchmark,
-    // matmul_benchmark,
-    sum_benchmark,
-    dynamic_add_comparison,
-    dynamic_sub_comparison,
-    dynamic_mul_comparison,
-    dynamic_div_comparison,
-    dynamic_matmul_comparison
-);
+criterion_group!(benches, dynamic_matmul_comparison);
+// criterion_group!(
+//     benches,
+//     add_benchmark,
+//     sub_benchmark,
+//     div_benchmark,
+//     mul_benchmark,
+//     // matmul_benchmark,
+//     sum_benchmark,
+//     dynamic_add_comparison,
+//     dynamic_sub_comparison,
+//     dynamic_mul_comparison,
+//     dynamic_div_comparison,
+//     dynamic_matmul_comparison
+// );
 criterion_main!(benches);

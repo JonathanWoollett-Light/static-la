@@ -41,7 +41,7 @@ In this example the only operations which cannot be fully checked at compile tim
 
 ### Comparisons
 
-The numerical type used is `f32`.
+The numerical type used is `f32`. We use specialization to call optimized BLAS functions for floating point types, this means this library will typically outperform ndarray and nalgebra with `f32` and `f64` operations but will underperformed with integer (`u32`,`i32`, etc.) operations.
 
 The x axis refers to the size of the matrices e.g. 50 refers to 50x50 matrices.
 
