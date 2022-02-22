@@ -146,6 +146,16 @@
 //! let c = a.transpose();
 //! assert_eq!(c,MatrixSxS::<i32,3,2>::from([[1, 4], [2, 5],[3, 6]]));
 //! ```
+//! ### BLAS
+//! ```ignore
+//! use static_la::MatrixSxS;
+//! let a = MatrixSxS::<f32, 2, 3>::from([[1., 3., 5.], [2., 4., 6.]]);
+//! let b = MatrixSxS::<f32, 3, 2>::from([[7., 10.], [8., 11.], [9., 12.]]);
+//! let mut c = MatrixSxS::<f32, 2, 2>::from([[0., 0.], [0., 0.]]);
+//! static_la::blas::sgemm(false, false, 1., &a, &b, 1., &mut c);
+//! assert_eq!(c, MatrixSxS::<f32, 2, 2>::from([[76., 103.], [100., 136.]]));
+//! ```
+//! The basic matrix multiply for `f32`s and `f64`s uses `sgemm` and `dgemm`.
 
 /// [`std::ops::Add`] Arithmetic addition operations.
 mod add;
@@ -208,6 +218,16 @@ mod bitor_assign;
 mod bitxor;
 /// [`std::ops::BitXorAssign`] Bitwise XOR assignment operation.
 mod bitxor_assign;
+/// BLAS operations.
+///
+/// There are too many combinations for the BLAS operations (sgemm has more than 64) to manually
+///  write the implementations to allow for compile time checking. So the checking and type
+///  joining does not occur with these functions.
+///
+/// If you have any idea how to do this better please open an issue, discussion or pull request.
+///
+/// There is nothing in the way of full support other than my own motivation, I plan to implement all BLAS functionality moving forward.
+pub mod blas;
 /// [`std::ops::Neg`] Negation operations.
 mod neg;
 /// [`std::ops::Not`] Bitwise NOT operations.
@@ -371,5 +391,13 @@ mod tests {
             a.slice_sxs::<{ 0..1 }, { 0..2 }>(),
             MatrixDxD::try_from(vec![vec![&1, &2]]).unwrap()
         );
+    }
+    #[test]
+    fn rustdoc5() {
+        let a = MatrixSxS::<f32, 2, 3>::from([[1., 3., 5.], [2., 4., 6.]]);
+        let b = MatrixSxS::<f32, 3, 2>::from([[7., 10.], [8., 11.], [9., 12.]]);
+        let mut c = MatrixSxS::<f32, 2, 2>::from([[0., 0.], [0., 0.]]);
+        crate::blas::sgemm(false, false, 1., &a, &b, 1., &mut c);
+        assert_eq!(c, MatrixSxS::<f32, 2, 2>::from([[76., 103.], [100., 136.]]));
     }
 }
