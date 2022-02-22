@@ -774,8 +774,8 @@ fn nalgebra_rand(rows: usize, columns: usize) -> nalgebra::DMatrix<f32> {
 
 fn dynamic_add_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Add");
-    group.warm_up_time(std::time::Duration::from_millis(50));
-    group.measurement_time(std::time::Duration::from_millis(400));
+    group.warm_up_time(std::time::Duration::from_millis(100));
+    group.measurement_time(std::time::Duration::from_millis(500));
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
@@ -796,8 +796,8 @@ fn dynamic_add_comparison(c: &mut Criterion) {
 }
 fn dynamic_sub_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Sub");
-    group.warm_up_time(std::time::Duration::from_millis(50));
-    group.measurement_time(std::time::Duration::from_millis(400));
+    group.warm_up_time(std::time::Duration::from_millis(100));
+    group.measurement_time(std::time::Duration::from_millis(500));
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
@@ -818,8 +818,8 @@ fn dynamic_sub_comparison(c: &mut Criterion) {
 }
 fn dynamic_div_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Div");
-    group.warm_up_time(std::time::Duration::from_millis(50));
-    group.measurement_time(std::time::Duration::from_millis(400));
+    group.warm_up_time(std::time::Duration::from_millis(100));
+    group.measurement_time(std::time::Duration::from_millis(500));
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
@@ -840,8 +840,8 @@ fn dynamic_div_comparison(c: &mut Criterion) {
 }
 fn dynamic_mul_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("std::ops::Mul");
-    group.warm_up_time(std::time::Duration::from_millis(50));
-    group.measurement_time(std::time::Duration::from_millis(400));
+    group.warm_up_time(std::time::Duration::from_millis(100));
+    group.measurement_time(std::time::Duration::from_millis(500));
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
@@ -863,8 +863,8 @@ fn dynamic_mul_comparison(c: &mut Criterion) {
 }
 fn dynamic_matmul_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("Matrix multiplication");
-    group.warm_up_time(std::time::Duration::from_millis(50));
-    group.measurement_time(std::time::Duration::from_millis(400));
+    group.warm_up_time(std::time::Duration::from_millis(100));
+    group.measurement_time(std::time::Duration::from_millis(500));
     for i in 10..100 {
         group.bench_with_input(BenchmarkId::new("ndarray", i), &i, |b, &i| {
             let x = ndarray_rand(i, i);
@@ -891,19 +891,19 @@ fn dynamic_matmul_comparison(c: &mut Criterion) {
 //     });
 // }
 // criterion_group!(benches,simple_matmul_benchmark);
-criterion_group!(benches, dynamic_matmul_comparison);
-// criterion_group!(
-//     benches,
-//     add_benchmark,
-//     sub_benchmark,
-//     div_benchmark,
-//     mul_benchmark,
-//     // matmul_benchmark,
-//     sum_benchmark,
-//     dynamic_add_comparison,
-//     dynamic_sub_comparison,
-//     dynamic_mul_comparison,
-//     dynamic_div_comparison,
-//     dynamic_matmul_comparison
-// );
+// criterion_group!(benches, dynamic_matmul_comparison);
+criterion_group!(
+    benches,
+    add_benchmark,
+    sub_benchmark,
+    div_benchmark,
+    mul_benchmark,
+    // matmul_benchmark,
+    sum_benchmark,
+    dynamic_add_comparison,
+    dynamic_sub_comparison,
+    dynamic_mul_comparison,
+    dynamic_div_comparison,
+    dynamic_matmul_comparison
+);
 criterion_main!(benches);
