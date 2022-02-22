@@ -172,7 +172,7 @@ mod div;
 /// [`std::ops::DivAssign`] Arithmetic division operations.
 mod div_assign;
 /// [`std::fmt::Display`] Format implementations.
-mod fmt;
+mod display;
 /// [`std::convert::From`] Value-to-value conversions.
 mod from;
 /// [`std::ops::Index`] Indexing operations.
