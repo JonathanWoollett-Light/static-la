@@ -5,7 +5,6 @@
 #![feature(adt_const_params)]
 #![feature(doc_cfg)]
 #![feature(specialization)]
-// #![feature(auto_traits, negative_impls)]
 //! An extremely minimal super static type safe implementation of matrix types.
 //!
 //! While [`ndarray`](https://docs.rs/ndarray/latest/ndarray/) offers no compile time type checking
