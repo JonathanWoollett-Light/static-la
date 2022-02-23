@@ -1,6 +1,3 @@
-#![allow(incomplete_features)]
-#![feature(generic_const_exprs)]
-
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use rand::Rng;
 use static_la::*;
@@ -524,7 +521,8 @@ fn mul_benchmark(c: &mut Criterion) {
     });
 }
 
-fn matmul_benchmark(c: &mut Criterion) {
+// This causes compilers error.
+fn _matmul_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("matrix multiplication");
     // group.warm_up_time(std::time::Duration::from_millis(100));
     // group.measurement_time(std::time::Duration::from_millis(500));
@@ -551,8 +549,18 @@ fn matmul_benchmark(c: &mut Criterion) {
     // --------------------------------------------------
     let mut rng = rand::thread_rng();
 
-    let a = static_la_rand(LARGE, LARGE);
-    let b = static_la_rand(LARGE, LARGE);
+    let a = MatrixDxD::try_from(
+        (0..LARGE)
+            .map(|_| (0..LARGE).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
+            .collect::<Vec<_>>(),
+    )
+    .unwrap();
+    let b = MatrixDxD::try_from(
+        (0..LARGE)
+            .map(|_| (0..LARGE).map(|_| rng.gen_range(RANGE)).collect::<Vec<_>>())
+            .collect::<Vec<_>>(),
+    )
+    .unwrap();
     group.bench_function("MatrixDxD matmul (l)", |bench| bench.iter(|| a.matmul(&b)));
 
     let a = MatrixDxS::<_, LARGE>::from({
@@ -875,14 +883,22 @@ fn dynamic_matmul_comparison(c: &mut Criterion) {
         });
     }
 }
-
+// fn simple_matmul_benchmark(c: &mut Criterion) {
+//     let a = static_la_rand(50, 50);
+//     let b = static_la_rand(50, 50);
+//     c.bench_function("Simple matmul", |bench| {
+//         bench.iter(|| a.clone().matmul(b.clone()))
+//     });
+// }
+// criterion_group!(benches,simple_matmul_benchmark);
+// criterion_group!(benches, dynamic_matmul_comparison);
 criterion_group!(
     benches,
     add_benchmark,
     sub_benchmark,
     div_benchmark,
     mul_benchmark,
-    matmul_benchmark,
+    // matmul_benchmark,
     sum_benchmark,
     dynamic_add_comparison,
     dynamic_sub_comparison,
