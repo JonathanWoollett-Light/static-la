@@ -4,11 +4,6 @@ use crate::*;
 use std::fmt::Debug;
 use std::ops::{AddAssign, Mul};
 
-// /// Internal trait used for specialization.
-// pub auto trait NotF32 {}
-// /// Internal trait impl used for specialization.
-// impl !NotF32 for f32 {}
-
 /// Internal matrix multiplication trait
 pub trait InternalMatmul: Sized {
     fn matmul(
