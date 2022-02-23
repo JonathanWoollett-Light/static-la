@@ -1,110 +1,12 @@
 extern crate openblas_src;
 
+use crate::blas::Matrix;
 use crate::*;
 use std::fmt::Debug;
 use std::ops::{AddAssign, Mul};
 
-// /// Internal trait used for specialization.
-// pub auto trait NotF32 {}
-// /// Internal trait impl used for specialization.
-// impl !NotF32 for f32 {}
-
-/// Internal matrix multiplication trait
-pub trait InternalMatmul: Sized {
-    fn matmul(
-        // An `m` by `k` row-major matrix.
-        a: &[Self],
-        // An `k` by `n` row-major matrix.
-        b: &[Self],
-        // An `m` by `n` row-major matrix.
-        c: &mut [Self],
-        // Rows of `a` and rows of `c`.
-        m: usize,
-        // Columns of `b` and columns of `c`.
-        n: usize,
-        // Columns of `a` and rows of `b`.
-        k: usize,
-    );
-}
-/// Default matrix multiplication implementation.
-impl<T: Debug + Mul<Output = T> + AddAssign + Copy + Debug> InternalMatmul for T {
-    default fn matmul(a: &[T], b: &[T], c: &mut [T], m: usize, n: usize, k: usize) {
-        debug_assert_eq!(a.len(), m * k);
-        debug_assert_eq!(b.len(), k * n);
-        debug_assert_eq!(c.len(), m * n);
-
-        for l_index in 0..m {
-            for m_index in 0..k {
-                for n_index in 0..n {
-                    let (i, j, k) = (
-                        l_index * n + n_index,
-                        l_index * k + m_index,
-                        m_index * n + n_index,
-                    );
-                    c[i] += a[j] * b[k];
-                }
-            }
-        }
-    }
-}
-/// `f32` matrix multiplication specialization.
-impl InternalMatmul for f32 {
-    fn matmul(a: &[f32], b: &[f32], c: &mut [f32], m: usize, n: usize, k: usize) {
-        assert_eq!(a.len(), m * k);
-        assert_eq!(b.len(), n * k);
-        assert_eq!(c.len(), m * n);
-        let (m, n, k) = (m as i32, n as i32, k as i32);
-        unsafe {
-            cblas::sgemm(
-                cblas::Layout::RowMajor,
-                cblas::Transpose::None,
-                cblas::Transpose::None,
-                m,
-                n,
-                k,
-                1.,
-                a,
-                k,
-                b,
-                n,
-                1.,
-                c,
-                n,
-            );
-        }
-    }
-}
-/// `f64` matrix multiplication specialization.
-impl InternalMatmul for f64 {
-    fn matmul(a: &[f64], b: &[f64], c: &mut [f64], m: usize, n: usize, k: usize) {
-        assert_eq!(a.len(), m * k);
-        assert_eq!(b.len(), n * k);
-        assert_eq!(c.len(), m * n);
-        let (m, n, k) = (m as i32, n as i32, k as i32);
-        unsafe {
-            cblas::dgemm(
-                cblas::Layout::RowMajor,
-                cblas::Transpose::None,
-                cblas::Transpose::None,
-                m,
-                n,
-                k,
-                1.,
-                a,
-                k,
-                b,
-                n,
-                1.,
-                c,
-                n,
-            );
-        }
-    }
-}
-
-/// A trait for matrix multiplication.
-pub trait Matmul<T> {
-    type Output;
+/// Matrix multiplication trait defining the operation on generic matrices.
+pub trait Matmul<T, B: Matrix<T>>: InternalMatmul<T, B> {
     /// ```text
     /// ┌───────┐        ┌─────┐  ┌─────┐
     /// │ 1 1 1 │        │ 1 2 │  │ 4 5 │
@@ -115,47 +17,132 @@ pub trait Matmul<T> {
     /// - M: Rows of `self` and rows of `Self::Output`.
     /// - K: Columns of `self` and rows of `other`.
     /// - N: Columns of `other` and columns of `Self::Output`.
-    fn matmul(&self, other: &T) -> Self::Output;
+    fn matmul(&self, b: &B) -> Self::Output;
 }
-
+impl<
+        T: Default + Mul<Output = T> + AddAssign + Copy + Debug,
+        B: Matrix<T>,
+        A: InternalMatmul<T, B>,
+    > Matmul<T, B> for A
+{
+    default fn matmul(&self, b: &B) -> Self::Output {
+        let mut c = self.pre(b);
+        let (m, n, k) = (self.rows(), b.columns(), self.columns());
+        for l_index in 0..m {
+            for k_index in 0..k {
+                for n_index in 0..n {
+                    let (i, j, k) = (
+                        l_index * n + n_index,
+                        l_index * k + k_index,
+                        k_index * n + n_index,
+                    );
+                    c.data_mut()[i] += self.data()[j] * b.data()[k];
+                }
+            }
+        }
+        c
+    }
+}
+/// `f32` specialization
+impl<B: Matrix<f32>, A: InternalMatmul<f32, B>> Matmul<f32, B> for A {
+    fn matmul(&self, b: &B) -> Self::Output {
+        let mut c = self.pre(b);
+        let (m, n, k) = (
+            self.rows() as i32,
+            b.columns() as i32,
+            self.columns() as i32,
+        );
+        unsafe {
+            cblas::sgemm(
+                cblas::Layout::RowMajor,
+                cblas::Transpose::None,
+                cblas::Transpose::None,
+                m,
+                n,
+                k,
+                1.,
+                self.data(),
+                k,
+                b.data(),
+                n,
+                1.,
+                c.data_mut(),
+                n,
+            );
+        }
+        c
+    }
+}
+/// `f64` specialization
+impl<B: Matrix<f64>, A: InternalMatmul<f64, B>> Matmul<f64, B> for A {
+    fn matmul(&self, b: &B) -> Self::Output {
+        let mut c = self.pre(b);
+        let (m, n, k) = (
+            self.rows() as i32,
+            b.columns() as i32,
+            self.columns() as i32,
+        );
+        unsafe {
+            cblas::dgemm(
+                cblas::Layout::RowMajor,
+                cblas::Transpose::None,
+                cblas::Transpose::None,
+                m,
+                n,
+                k,
+                1.,
+                self.data(),
+                k,
+                b.data(),
+                n,
+                1.,
+                c.data_mut(),
+                n,
+            );
+        }
+        c
+    }
+}
+/// Specific internal matrix multiplication trait defining the non-generic interactions between combinations of matrix types.
+///
+/// This requires an implementation for every combination.
+pub trait InternalMatmul<T, B: Matrix<T>>: Matrix<T> {
+    type Output: Matrix<T>;
+    /// Non-generic pre-operation work (i.e. bounds checking & returning the new matrix to fill)
+    fn pre(&self, b: &B) -> Self::Output;
+}
 // MatrixDxD
 // --------------------------------------------------
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T>, const K: usize, const N: usize>
-    Matmul<MatrixSxS<T, K, N>> for MatrixDxD<T>
+// MatrixDxD @ MatrixSxS
+impl<T: Default + Copy, const K: usize, const N: usize> InternalMatmul<T, MatrixSxS<T, K, N>>
+    for MatrixDxD<T>
 where
     [(); K * N]:,
 {
     type Output = MatrixDxS<T, N>;
-    fn matmul(&self, other: &MatrixSxS<T, K, N>) -> Self::Output {
+    fn pre(&self, _: &MatrixSxS<T, K, N>) -> Self::Output {
         assert_eq!(self.columns, K, "Non-matching columns to rows");
 
         let m = self.rows;
-        let mut data = vec![Default::default(); N * m];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, m, N, K);
+        let data = vec![Default::default(); N * m];
         Self::Output { data, rows: m }
     }
 }
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T>, const N: usize>
-    Matmul<MatrixDxS<T, N>> for MatrixDxD<T>
-{
+impl<T: Default + Copy, const N: usize> InternalMatmul<T, MatrixDxS<T, N>> for MatrixDxD<T> {
     type Output = MatrixDxS<T, N>;
-    fn matmul(&self, other: &MatrixDxS<T, N>) -> Self::Output {
+    fn pre(&self, other: &MatrixDxS<T, N>) -> Self::Output {
         assert_eq!(self.columns, other.rows, "Non-matching columns to rows");
 
-        let (m, k) = (self.rows, self.columns);
-        let mut data = vec![Default::default(); m * N];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, m, N, k);
+        let m = self.rows;
+        let data = vec![Default::default(); m * N];
         Self::Output { data, rows: m }
     }
 }
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug, const K: usize>
-    Matmul<MatrixSxD<T, K>> for MatrixDxD<T>
-{
+impl<T: Default + Copy, const K: usize> InternalMatmul<T, MatrixSxD<T, K>> for MatrixDxD<T> {
     type Output = MatrixDxD<T>;
-    fn matmul(&self, other: &MatrixSxD<T, K>) -> Self::Output {
+    fn pre(&self, other: &MatrixSxD<T, K>) -> Self::Output {
         let (m, n) = (self.rows, other.columns);
-        let mut data = vec![Default::default(); m * n];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, m, n, K);
+        let data = vec![Default::default(); m * n];
         Self::Output {
             data,
             rows: m,
@@ -163,16 +150,13 @@ impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug, 
         }
     }
 }
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug> Matmul<MatrixDxD<T>>
-    for MatrixDxD<T>
-{
+impl<T: Default + Copy> InternalMatmul<T, MatrixDxD<T>> for MatrixDxD<T> {
     type Output = MatrixDxD<T>;
-    fn matmul(&self, other: &MatrixDxD<T>) -> Self::Output {
+    fn pre(&self, other: &MatrixDxD<T>) -> Self::Output {
         assert_eq!(self.columns, other.rows, "Non-matching columns to rows");
 
-        let (m, k, n) = (self.rows, self.columns, other.columns);
-        let mut data = vec![Default::default(); m * n];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, m, n, k);
+        let (m, n) = (self.rows, other.columns);
+        let data = vec![Default::default(); m * n];
         Self::Output {
             data,
             rows: m,
@@ -182,38 +166,33 @@ impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug> 
 }
 // MatrixDxS
 // --------------------------------------------------
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T>, const K: usize, const N: usize>
-    Matmul<MatrixSxS<T, K, N>> for MatrixDxS<T, K>
+impl<T: Default + Copy, const K: usize, const N: usize> InternalMatmul<T, MatrixSxS<T, K, N>>
+    for MatrixDxS<T, K>
 where
     [(); K * N]:,
 {
     type Output = MatrixDxS<T, N>;
-    fn matmul(&self, other: &MatrixSxS<T, K, N>) -> Self::Output {
+    fn pre(&self, _: &MatrixSxS<T, K, N>) -> Self::Output {
         let m = self.rows;
-        let mut data = vec![Default::default(); m * N];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, m, N, K);
+        let data = vec![Default::default(); m * N];
         Self::Output { data, rows: m }
     }
 }
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T>, const K: usize, const N: usize>
-    Matmul<MatrixDxS<T, N>> for MatrixDxS<T, K>
+impl<T: Default + Copy, const K: usize, const N: usize> InternalMatmul<T, MatrixDxS<T, N>>
+    for MatrixDxS<T, K>
 {
     type Output = MatrixDxS<T, N>;
-    fn matmul(&self, other: &MatrixDxS<T, N>) -> Self::Output {
+    fn pre(&self, _: &MatrixDxS<T, N>) -> Self::Output {
         let m = self.rows;
-        let mut data = vec![Default::default(); m * N];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, m, N, K);
+        let data = vec![Default::default(); m * N];
         Self::Output { data, rows: m }
     }
 }
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug, const K: usize>
-    Matmul<MatrixSxD<T, K>> for MatrixDxS<T, K>
-{
+impl<T: Default + Copy, const K: usize> InternalMatmul<T, MatrixSxD<T, K>> for MatrixDxS<T, K> {
     type Output = MatrixDxD<T>;
-    fn matmul(&self, other: &MatrixSxD<T, K>) -> Self::Output {
+    fn pre(&self, other: &MatrixSxD<T, K>) -> Self::Output {
         let (m, n) = (self.rows, other.columns);
-        let mut data = vec![Default::default(); m * n];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, m, n, K);
+        let data = vec![Default::default(); m * n];
         Self::Output {
             data,
             rows: m,
@@ -221,16 +200,13 @@ impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug, 
         }
     }
 }
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug, const K: usize>
-    Matmul<MatrixDxD<T>> for MatrixDxS<T, K>
-{
+impl<T: Default + Copy, const K: usize> InternalMatmul<T, MatrixDxD<T>> for MatrixDxS<T, K> {
     type Output = MatrixDxD<T>;
-    fn matmul(&self, other: &MatrixDxD<T>) -> Self::Output {
+    fn pre(&self, other: &MatrixDxD<T>) -> Self::Output {
         assert_eq!(K, other.rows, "Non-matching columns to rows");
 
         let (m, n) = (self.rows, other.columns);
-        let mut data = vec![Default::default(); m * n];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, m, n, K);
+        let data = vec![Default::default(); m * n];
         Self::Output {
             data,
             rows: m,
@@ -240,133 +216,101 @@ impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug, 
 }
 // MatrixSxD
 // --------------------------------------------------
-impl<
-        T: Debug + Default + Copy + AddAssign + Mul<Output = T>,
-        const M: usize,
-        const K: usize,
-        const N: usize,
-    > Matmul<MatrixSxS<T, K, N>> for MatrixSxD<T, M>
+impl<T: Default + Copy, const M: usize, const K: usize, const N: usize>
+    InternalMatmul<T, MatrixSxS<T, K, N>> for MatrixSxD<T, M>
 where
     [(); M * N]:,
     [(); K * N]:,
 {
     type Output = MatrixSxS<T, M, N>;
-    fn matmul(&self, other: &MatrixSxS<T, K, N>) -> Self::Output {
-        let mut data = [Default::default(); M * N];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, M, N, K);
+    fn pre(&self, _: &MatrixSxS<T, K, N>) -> Self::Output {
+        let data = [Default::default(); M * N];
         Self::Output { data }
     }
 }
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T>, const M: usize, const N: usize>
-    Matmul<MatrixDxS<T, N>> for MatrixSxD<T, M>
+impl<T: Default + Copy, const M: usize, const N: usize> InternalMatmul<T, MatrixDxS<T, N>>
+    for MatrixSxD<T, M>
 where
     [(); M * N]:,
 {
     type Output = MatrixSxS<T, M, N>;
-    fn matmul(&self, other: &MatrixDxS<T, N>) -> Self::Output {
+    fn pre(&self, other: &MatrixDxS<T, N>) -> Self::Output {
         assert_eq!(self.columns, other.rows, "Non-matching columns to rows");
 
-        let k = self.columns;
-        let mut data = [Default::default(); M * N];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, M, N, k);
+        let data = [Default::default(); M * N];
         Self::Output { data }
     }
 }
-impl<
-        T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug,
-        const M: usize,
-        const K: usize,
-    > Matmul<MatrixSxD<T, K>> for MatrixSxD<T, M>
+impl<T: Default + Copy, const M: usize, const K: usize> InternalMatmul<T, MatrixSxD<T, K>>
+    for MatrixSxD<T, M>
 {
     type Output = MatrixSxD<T, M>;
-    fn matmul(&self, other: &MatrixSxD<T, K>) -> Self::Output {
+    fn pre(&self, other: &MatrixSxD<T, K>) -> Self::Output {
         let n = other.columns;
-        let mut data = vec![Default::default(); M * n];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, M, n, K);
+        let data = vec![Default::default(); M * n];
         Self::Output { data, columns: n }
     }
 }
-impl<T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug, const M: usize>
-    Matmul<MatrixDxD<T>> for MatrixSxD<T, M>
-{
+impl<T: Default + Copy, const M: usize> InternalMatmul<T, MatrixDxD<T>> for MatrixSxD<T, M> {
     type Output = MatrixSxD<T, M>;
-    fn matmul(&self, other: &MatrixDxD<T>) -> Self::Output {
+    fn pre(&self, other: &MatrixDxD<T>) -> Self::Output {
         assert_eq!(self.columns, other.rows, "Non-matching columns to rows");
 
-        let (k, n) = (self.columns, other.columns);
-        let mut data = vec![Default::default(); M * n];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, M, n, k);
+        let n = other.columns;
+        let data = vec![Default::default(); M * n];
         Self::Output { data, columns: n }
     }
 }
 // MatrixSxS
 // --------------------------------------------------
-impl<
-        T: Debug + Default + Copy + AddAssign + Mul<Output = T>,
-        const M: usize,
-        const K: usize,
-        const N: usize,
-    > Matmul<MatrixSxS<T, K, N>> for MatrixSxS<T, M, K>
+impl<T: Default + Copy, const M: usize, const K: usize, const N: usize>
+    InternalMatmul<T, MatrixSxS<T, K, N>> for MatrixSxS<T, M, K>
 where
     [(); M * K]:,
     [(); K * N]:,
     [(); M * N]:,
 {
     type Output = MatrixSxS<T, M, N>;
-    fn matmul(&self, other: &MatrixSxS<T, K, N>) -> Self::Output {
-        let mut data = [Default::default(); M * N];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, M, N, K);
+    fn pre(&self, _: &MatrixSxS<T, K, N>) -> Self::Output {
+        let data = [Default::default(); M * N];
         Self::Output { data }
     }
 }
-impl<
-        T: Debug + Default + Copy + AddAssign + Mul<Output = T>,
-        const M: usize,
-        const K: usize,
-        const N: usize,
-    > Matmul<MatrixDxS<T, N>> for MatrixSxS<T, M, K>
+impl<T: Default + Copy, const M: usize, const K: usize, const N: usize>
+    InternalMatmul<T, MatrixDxS<T, N>> for MatrixSxS<T, M, K>
 where
     [(); M * K]:,
     [(); M * N]:,
 {
     type Output = MatrixSxS<T, M, N>;
-    fn matmul(&self, other: &MatrixDxS<T, N>) -> Self::Output {
-        let mut data = [Default::default(); M * N];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, M, N, K);
+    fn pre(&self, _: &MatrixDxS<T, N>) -> Self::Output {
+        let data = [Default::default(); M * N];
         Self::Output { data }
     }
 }
-impl<
-        T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug,
-        const M: usize,
-        const K: usize,
-    > Matmul<MatrixSxD<T, K>> for MatrixSxS<T, M, K>
+impl<T: Default + Copy, const M: usize, const K: usize> InternalMatmul<T, MatrixSxD<T, K>>
+    for MatrixSxS<T, M, K>
 where
     [(); M * K]:,
 {
     type Output = MatrixSxD<T, M>;
-    fn matmul(&self, other: &MatrixSxD<T, K>) -> Self::Output {
+    fn pre(&self, other: &MatrixSxD<T, K>) -> Self::Output {
         let n = other.columns;
-        let mut data = vec![Default::default(); M * n];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, M, n, K);
+        let data = vec![Default::default(); M * n];
         Self::Output { data, columns: n }
     }
 }
-impl<
-        T: Debug + Default + Copy + AddAssign + Mul<Output = T> + std::fmt::Debug,
-        const M: usize,
-        const K: usize,
-    > Matmul<MatrixDxD<T>> for MatrixSxS<T, M, K>
+impl<T: Default + Copy, const M: usize, const K: usize> InternalMatmul<T, MatrixDxD<T>>
+    for MatrixSxS<T, M, K>
 where
     [(); M * K]:,
 {
     type Output = MatrixSxD<T, M>;
-    fn matmul(&self, other: &MatrixDxD<T>) -> Self::Output {
+    fn pre(&self, other: &MatrixDxD<T>) -> Self::Output {
         assert_eq!(K, other.rows, "Non-matching columns to rows");
 
         let n = other.columns;
-        let mut data = vec![Default::default(); M * n];
-        InternalMatmul::matmul(&self.data, &other.data, &mut data, M, n, K);
+        let data = vec![Default::default(); M * n];
         Self::Output { data, columns: n }
     }
 }
