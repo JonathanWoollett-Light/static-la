@@ -376,14 +376,6 @@ where
 mod tests {
     use crate::*;
     use std::convert::TryFrom;
-    #[test]
-    fn special() {
-        let l = MatrixSxS::<f32, 3, 3>::from([[1., 0., 0.], [2., 4., 0.], [3., 5., 6.]]);
-        let lt = l.transpose();
-        println!("{}", lt);
-        let a = l.matmul(&lt);
-        println!("{}", a);
-    }
     // f32
     // --------------------------------------------------
     #[test]
