@@ -18,6 +18,8 @@ When performing the addition of a `MatrixDxS` (a matrix with a known number of c
 
 An example of how types will propagate through a program:
 ```rust
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
 use static_la::*;
 // MatrixSxS<i32,2,3>
 let a = MatrixSxS::from([[1,2,3],[4,5,6]]);
@@ -36,6 +38,8 @@ let f = d.add_columns(e);
 In this example the only operations which cannot be fully checked at compile time are:
 1. `a.clone() + b.clone()`
 2. `d.add_columns(e)`
+
+ **You must include `#![feature(generic_const_exprs)]` when using this library otherwise you will get a compiler error.**
 
 ### Comparisons
 

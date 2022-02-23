@@ -20,10 +20,10 @@
 //!
 //! That being said... I made this in a weekend and there is a tiny amount of functionality.
 //!
-//! *Note: Some examples may be ignored but all are tested, in rustdoc or in a plain test.*
-//!
 //! An example of how types will propagate through a program:
-//! ```ignore
+//! ```
+//! #![allow(incomplete_features)]
+//! #![feature(generic_const_exprs)]
 //! use static_la::*;
 //! // MatrixSxS<i32,2,3>
 //! let a = MatrixSxS::from([[1,2,3],[4,5,6]]);
@@ -44,8 +44,12 @@
 //! 2. `d.add_columns(e)`
 //!
 //!
+//! **You must include `#![feature(generic_const_exprs)]` when using this library otherwise you will get a compiler error.**
+//!
 //! ### Construction
-//! ```rust
+//! ```
+//! # #![allow(incomplete_features)]
+//! # #![feature(generic_const_exprs)]
 //! use std::convert::TryFrom;
 //! use static_la::*;
 //! // From shaped arrays/vecs
@@ -57,12 +61,12 @@
 //! let dxd = MatrixDxD::try_from((2,3,vec![1, 2, 3, 4, 5, 6])).unwrap();
 //! let dxs = MatrixDxS::<_,2>::try_from((3,vec![1, 2, 3,4, 5, 6])).unwrap();
 //! let sxd = MatrixSxD::<_,3>::try_from((2,vec![1, 2, 3, 4, 5, 6])).unwrap();
-//! let sxs = MatrixSxS::<_,2,3>::from([1, 2, 3, 4, 5, 6]);
+//! let sxs = MatrixSxS::<i32,2,3>::from([1, 2, 3, 4, 5, 6]);
 //! // From a given shape and slice
 //! let dxd = MatrixDxD::try_from((2,3,&[1, 2, 3, 4, 5, 6])).unwrap();
 //! let dxs = MatrixDxS::<_,2>::try_from((3,&[1, 2, 3,4, 5, 6])).unwrap();
 //! let sxd = MatrixSxD::<_,3>::try_from((2,&[1, 2, 3, 4, 5, 6])).unwrap();
-//! let sxs = MatrixSxS::<_,2,3>::from(&[1, 2, 3, 4, 5, 6]);
+//! let sxs = MatrixSxS::<i32,2,3>::from(&[1, 2, 3, 4, 5, 6]);
 //! // ┌───────┐
 //! // │ 1 2 3 │
 //! // │ 4 5 6 │
@@ -71,7 +75,7 @@
 //! let dxd = MatrixDxD::from((2,3,5));
 //! let dxs = MatrixDxS::<_,3>::from((2,5));
 //! let sxd = MatrixSxD::<_,2>::from((3,5));
-//! let sxs = MatrixSxS::<_,2,3>::from(5);
+//! let sxs = MatrixSxS::<i32,2,3>::from(5);
 //! // ┌───────┐
 //! // │ 5 5 5 │
 //! // │ 5 5 5 │
@@ -79,9 +83,12 @@
 //! ```
 //! *This requires the `distribution` feature.*
 //! ```ignore
+//! # #![allow(incomplete_features)]
+//! # #![feature(generic_const_exprs)]
 //! // From a given shape and with values sampled from a given distribution
 //! use rand::distributions::{Uniform,Standard};
-//! let dxd = MatrixDxD::<i32>::distribution(2,3,Uniform::from(0..10));
+//! use static_la::*;
+//! let dxd = MatrixDxD::<i32>::distribution(2,3,Uniform::from(0i32..10i32));
 //! let dxs = MatrixDxS::<f32,3>::distribution(2,Standard);
 //! let sxd = MatrixSxD::<f32,2>::distribution(3,Standard);
 //! let sxs = MatrixSxS::<f32,2,3>::distribution(Standard);
@@ -98,7 +105,9 @@
 //! assert_eq!(a[(1,2)], 6);
 //! ```
 //! ### Expansion
-//! ```ignore
+//! ```
+//! # #![allow(incomplete_features)]
+//! # #![feature(generic_const_exprs)]
 //! use std::convert::TryFrom;
 //! use static_la::*;
 //! let a = MatrixDxD::try_from(vec![vec![1, 2]]).unwrap();
@@ -119,7 +128,9 @@
 //! ```
 //! ### Arithmetic
 //! Most traits from [`std::ops`] are implemented for both matrix and scalar types.
-//! ```ignore
+//! ```
+//! # #![allow(incomplete_features)]
+//! # #![feature(generic_const_exprs)]
 //! use static_la::MatrixSxS;
 //! let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
 //! let b = a + 7;
@@ -128,7 +139,9 @@
 //! c += MatrixSxS::from([[10, 20, 30], [40, 50, 60]]);
 //! ```
 //! ### Slicing
-//! ```ignore
+//! ```
+//! # #![allow(incomplete_features)]
+//! # #![feature(generic_const_exprs)]
 //! use std::convert::TryFrom;
 //! use static_la::*;
 //! let a = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
@@ -148,6 +161,8 @@
 //! ```
 //! ### BLAS
 //! ```ignore
+//! # #![allow(incomplete_features)]
+//! # #![feature(generic_const_exprs)]
 //! use static_la::MatrixSxS;
 //! let a = MatrixSxS::<f32, 2, 3>::from([[1., 3., 5.], [2., 4., 6.]]);
 //! let b = MatrixSxS::<f32, 3, 2>::from([[7., 10.], [8., 11.], [9., 12.]]);
@@ -329,71 +344,11 @@ pub type RowVectorD<T> = MatrixSxD<T, 1>;
 /// ```
 pub type RowVectorS<T, const COLUMNS: usize> = MatrixSxS<T, 1, COLUMNS>;
 
-// These tests performs the tests that are ignored in the rustdoc.
-// They are ignored in rustdoc as they cause compiler errors.
 #[cfg(test)]
 mod tests {
-    use crate::*;
-    use std::convert::TryFrom;
     #[test]
-    fn rustdoc1() {
-        // MatrixSxS<i32,2,3>
-        let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
-        // MatrixDxS<i32,3>
-        let b = MatrixDxS::from(vec![[2, 2, 2], [3, 3, 3]]);
-        // MatrixSxS<i32,2,3>
-        let c = (a.clone() + b.clone()) - a.clone();
-        // MatrixDxS<i32,3>
-        let d = c.add_rows(b);
-        // MatrixSxS<i32,4,3>
-        let e = MatrixSxS::from([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]);
-        // MatrixSxS<i32,4,6>
-        let _f = d.add_columns(e);
-    }
-    #[test]
-    fn rustdoc2() {
-        let a = MatrixDxD::try_from(vec![vec![1, 2]]).unwrap();
-        let b = a.add_rows(MatrixDxS::from(vec![[4, 5]]));
-        let c = b.add_columns(MatrixSxS::from([[3], [6]]));
-        assert_eq!(
-            c,
-            MatrixSxD::try_from([vec![1, 2, 3], vec![4, 5, 6]]).unwrap()
-        );
-    }
-    #[test]
-    fn rustdoc3() {
-        let a = MatrixSxS::from([[1, 2, 3], [4, 5, 6]]);
-        let b = a + 7;
-        let mut c = b + MatrixSxS::from([[10, 20, 30], [40, 50, 60]]);
-        c += 3;
-        c += MatrixSxS::from([[10, 20, 30], [40, 50, 60]]);
-    }
-    #[test]
-    fn rustdoc4() {
-        let a = MatrixDxD::try_from(vec![vec![1, 2, 3], vec![4, 5, 6]]).unwrap();
-        assert_eq!(
-            a.slice_dxd((0..1, 0..2)),
-            MatrixDxD::try_from(vec![vec![&1, &2]]).unwrap()
-        );
-        assert_eq!(
-            a.slice_dxs::<{ 0..2 }>(0..1),
-            MatrixDxS::from(vec![[&1, &2]])
-        );
-        assert_eq!(
-            a.slice_sxd::<{ 0..1 }>(0..2),
-            MatrixSxD::try_from([vec![&1, &2]]).unwrap()
-        );
-        assert_eq!(
-            a.slice_sxs::<{ 0..1 }, { 0..2 }>(),
-            MatrixSxS::from([[&1, &2]])
-        );
-        assert_eq!(
-            a.slice_sxs::<{ 0..1 }, { 0..2 }>(),
-            MatrixDxD::try_from(vec![vec![&1, &2]]).unwrap()
-        );
-    }
-    #[test]
-    fn rustdoc5() {
+    fn rustdoc() {
+        use crate::MatrixSxS;
         let a = MatrixSxS::<f32, 2, 3>::from([[1., 3., 5.], [2., 4., 6.]]);
         let b = MatrixSxS::<f32, 3, 2>::from([[7., 10.], [8., 11.], [9., 12.]]);
         let mut c = MatrixSxS::<f32, 2, 2>::from([[0., 0.], [0., 0.]]);

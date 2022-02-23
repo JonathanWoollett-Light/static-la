@@ -1,6 +1,6 @@
 [package]
 name = "static-la"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["Jonathan <jonthanwoollettlight@gmail.com>"]
 edition = "2018"
 
