@@ -4,6 +4,8 @@
 [![lib.rs.io](https://img.shields.io/crates/v/static-la?color=blue&label=lib.rs)](https://lib.rs/crates/static-la)
 [![docs](https://img.shields.io/crates/v/static-la?color=yellow&label=docs)](https://docs.rs/static-la)
 
+*I've put a lot of work into the next generation version of this library [tensor-lib](https://github.com/JonathanWoollett-Light/tensor-lib) (placeholder name). Hopefully this should be cleaned up and ready for release soon-ish (a few months I reckon).*
+
 A fast minimal ultra type safe linear algebra library.
 
 While [`ndarray`](https://docs.rs/ndarray/latest/ndarray/) offers no compile time type checking
